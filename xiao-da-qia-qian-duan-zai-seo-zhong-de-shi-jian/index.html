@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>小打卡-前端在SEO中的实践 | 糖小喵zzz</title>
+<meta name="description" content="我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://omobruce.github.io/favicon.ico?v=1589618212799">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://omobruce.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://omobruce.github.io">
+        <img class="avatar" src="https://omobruce.github.io/images/avatar.png?v=1589618212799" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://omobruce.github.io">
+        <h1 class="site-title">糖小喵zzz</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://omobruce.github.io/xiao-bao-de-mao" class="menu purple-link">
+            小宝的猫
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">小打卡-前端在SEO中的实践</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2019-12-23</span>
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://omobruce.github.io/gK-PcsaRB/">
+                    前端
+                    
+                  </a>
+                
+              </span>
+            
+          </div>
+          <div class="post-content">
+            <p>SEO（Search Engine Optimization）：汉译为搜索引擎优化。是一种方式：利用搜索引擎的规则提高网站在有关搜索引擎内的自然排名。目的是让其在行业内占据领先地位，获得品牌收益。很大程度上是网站经营者的一种商业行为，将自己或自己公司的排名前移。</p>
+<!-- more -->
+<h1 id="seo简单原理">SEO简单原理</h1>
+<ul>
+<li>网页抓取：蜘蛛向目标服务器发起请求获取网页内容</li>
+<li>分析入库：对获取的内容进行分析并将优质内容入库</li>
+<li>索引排序：当用户搜索关键词的时候从收录的页面中按照一定规则进行排序并返回给用户</li>
+</ul>
+<p>SEO的优化也就是针对以上的每一个步骤进行针对性的优化，那么前端在中间扮演的角色就显得尤为重要了。因为大部分的优化都是前端来做的。</p>
+<h2 id="网页抓取">网页抓取</h2>
+<p>如何让蜘蛛抓取的内容能够尽量的符合蜘蛛的要求，那么就需要我们对我们的前端页面进行优化。</p>
+<h3 id="服务端渲染与客户端渲染">服务端渲染与客户端渲染</h3>
+<p>在单页面应用技术栈极为流行的现在，这种技术显然是对蜘蛛极其不友好的。蜘蛛需要的抓取的网页就是内容页，而单页面应用通过js来渲染的方式就不太适用于抓取 了。所以服务端直出网页又被推到了前面。所以SSR服务端渲染是首选的技术类型。</p>
+<h3 id="页面结构优化">页面结构优化</h3>
+<ul>
+<li>在做页面结构的时候有很重要的一点就是标签语义化，将网页结构明确出来，这样更容易让蜘蛛了解到我们的网页结构。如果通篇的DIV、P标签蜘蛛或许就直接懵逼了。</li>
+<li>点击跳转事件，在现在流行的前端技术栈中或许我们已经忘记了a标签的存在，大多都喜欢使用事件绑定或者自带的跳转组件来实现页面的跳转。对于蜘蛛来讲其实它就认得a标签，所以我们需要将网页中的跳转事件都通过a标签来实现，通过a标签来进行页面跳转是为了让蜘蛛可以知道他可以顺着这些链接继续爬着去其他相关页面，并且一个网页的相关链接在一定的合理范围内是有利于提升该网页的排名的。值得注意的一点是a标签下的地址是需要使用全链接的形如:https://www.xiadaoka.com/explore/item/123123312, 而不是一个相对路径 /explore/item/1231231231。</li>
+<li>针对img标签需要给出alt描述字段的，这个是为了当图片加载不出来的时候是需要告诉蜘蛛这个图是啥图是干啥的。</li>
+<li>document.title的优化，一个好的title是能体现该网页的主要内容的，所以在网页title上也是有一定规律可以寻找的。也是蜘蛛收录时比较侧重关注的一点。通过调研对比多家网站的title表现形式大致可以总结为以下形式：<br>
+网页内容关键内容_标签_标签_主站名称<br>
+<img src="https://omobruce.github.io/post-images/1577073400681.png" alt="" loading="lazy"></li>
+<li>meta优化，蜘蛛爬取网页内容的时候怎么去分析与收录我们的网页以及给我们的网页标识为什么网页除了title很重要之外其中对于网页的介绍与关键词的给出也是同样重要。那么keywords、description也是需要我们去在网页中加上的。大家可能会说既然这么重要，那我把信息全部都塞进这些里不就行啦。答案肯定是否定的，蜘蛛又不傻，搜索引擎的算法又不傻，关键字或者介绍内容过多效果只会适得其反，会让蜘蛛觉得你给的东西没有重点。</li>
+</ul>
+<p>以上大概就是我们在写页面时大概需要注意的一些点，可能有不全不准确的。</p>
+<h3 id="让蜘蛛来光顾">让蜘蛛来光顾</h3>
+<p>做好了我们该做的事后一个问题是让搜索引擎的蜘蛛如何来我们这儿溜达并抓取，各大搜索引擎的站长平台都给我们提供了多种方式来帮助我们吸引蜘蛛来到我们网站，这里主要以百度搜索为主：</p>
+<ol>
+<li>sitemap提交，sitemap站点地图，是描述我们网站的一个地图。其中提供了网站更新时间，网站页面结构，网站地址。通过这种方式提交给搜索引擎来告诉蜘蛛这儿有啥。</li>
+<li>主动提交，也就是通过调用搜索引擎为我们提供的接口的方式，将我们的网页地址主动推送给蜘蛛。告诉蜘蛛我们有这个网页你可以来瞅瞅。</li>
+<li>实时提交，也就是通过当用户访问我们网站的时候通过搜索引擎给出的js代码将该地址推送给搜索引擎。</li>
+</ol>
+<p>以上的三种方式可以同时进行并不冲突。</p>
+<h3 id="网页地址格式">网页地址格式</h3>
+<ul>
+<li>url格式先开始推送的时候最好就确定下来，后期最好不要做改动</li>
+<li>做好url的301跳转，网页地址有变动的时候一定要做好301的跳转，尽量降低蜘蛛过来访问出现不可访问的状态，</li>
+<li>如果有条件的可以将全站https化，这样不仅在安全性上有好处并且对于蜘蛛来说会判断为该网站是真实可靠的。</li>
+</ul>
+<h2 id="检索排序">检索排序</h2>
+<p>我们希望的是收录后的内容能尽量去命中用户的搜索，那么就需要去针对搜索引擎做检索优化啦。</p>
+<h3 id="tdk优化">TDK优化</h3>
+<p>title、keywords、description优化，之前在页面结构有写为什么要写好title，一个好的title是能极大提升检索命中率，之前说以 <strong>内容</strong> <strong>标签</strong> <strong>主站名</strong> 的格式来确定一个标题。最终的目的就是尽量表明该网页内容。如果有条件的，可以考虑分词的做法，并结合NLP(中文自然语言处理)来针对网页提取关键词。当然这个是我觉得应该做到极致的时候，通常我们通过设定部分规则也就行了。</p>
+<h3 id="提升关键词密度">提升关键词密度</h3>
+<p>一个简单的栗子，有一段200字的文字，其中有一个词出现了50词。那么最后提起这段话的时候你最先会想起哪个词。一定是出现频率最高的那一个。<br>
+<img src="https://omobruce.github.io/post-images/1577075395380.png" alt="" loading="lazy"><br>
+上图是小打卡在对标题、介绍、关键字做的一些优化，尽量的是去曝光打卡、兴趣、等关键词，那么当用户在搜索对应关键词的时候就有几率去提升我们网页在检索时候的命中率。</p>
+<h2 id="其他优化">其他优化</h2>
+<p>利用工具，当我们开始向搜索引擎推送网页后，我们需要去及时关注我们的网页收录情况并且针对对某一个点持续优化，<a href="http://seo.chinaz.com/xiaodaka.com"></a>。<br>
+<img src="https://omobruce.github.io/post-images/1577075775912.png" alt="" loading="lazy"><br>
+通过站长工具我们可以很好的看出我们当前网站的一个整体情况，当然通过站长工具也能看出我们网页的关键字是否是我们满意的结果<br>
+<img src="https://omobruce.github.io/post-images/1577075843249.png" alt="" loading="lazy"><br>
+网页适配问题。站点上线，我们希望pc访问与移动端访问都有一个良好的体验，那么对于蜘蛛来说同样的，所以我们需要提供良好的多端访问体验。</p>
+<ul>
+<li>一套代码适配多端，通过利用Bootstrap等方案来实现不同设备的不同访问体验。这可能是最简单的方式，但是由于需要去维护复杂的代码逻辑这种方式其实称不上优秀并并且在多端差异化上也不能很好的去支持</li>
+<li>动态适配方案。通过nginx来对访问设备的反向代理，将访问设备分别分发至不同的站点，那么就产生了现在大多数网站选择的方案，PC站、M站。并且能提供两端不同的体验。但是一个问题是出现了不同的站点域名这也是不利于蜘蛛爬取的。</li>
+<li>动态路由方案。通过node服务将访问设备通过user-agent进行区分，由agent来指定不同的服务端渲染方式。这样便能解决多端访问的适配问题</li>
+</ul>
+<h2 id="后续">后续</h2>
+<p>我们知道蜘蛛都是通过请求服务器来获取网站内容的。并爬取相关内容，对于正经的蜘蛛来讲我们是允许并且欢迎的，要是对于那些不太正经的蜘蛛或者人来说我们需要干掉他们来保证我们的数据安全。</p>
+<h3 id="防止不正经爬虫">防止不正经爬虫</h3>
+<p>小打卡在这一块儿现目前做了几点来防止不正经或者是恶意爬取数据</p>
+<ul>
+<li>加密我们的请求参数。我们都知道如果一个网站的链接地址如果是有规律可循的那么就惨了，我们便可以很轻松的根据这么一个地址规律来快乐的获取该网站的数据内容。严重的情况下网站的数据会被人统统扒光。所以首先要做的就是让别人没有规律可寻。<br>
+<img src="https://omobruce.github.io/post-images/1577077118191.png" alt="" loading="lazy"></li>
+<li>设置robots文件，robots是网站跟爬虫间的协议，用简单直接的txt格式文本方式告诉对应的爬虫被允许的权限，也就是说robots.txt是搜索引擎中访问网站的时候要查看的第一个文件。当一个搜索蜘蛛访问一个站点时，它会首先检查该站点根目录下是否存在robots.txt，如果存在，搜索机器人就会按照该文件中的内容来确定访问的范围；如果该文件不存在，所有的搜索蜘蛛将能够访问网站上所有没有被口令保护的页面。<br>
+<img src="https://omobruce.github.io/post-images/1577077190248.png" alt="" loading="lazy"><br>
+通过跟蜘蛛约定好规则，告诉它你可以看哪些内容，不可以看哪些内容。最快多久看一次，通过robots文件的约定便可以控制住蜘蛛的访问。但是后来我们发现有人不遵守这个规则，堪称业界毒瘤。<br>
+<img src="https://omobruce.github.io/post-images/1577077362354.png" alt="" loading="lazy"><br>
+从上图的访问统计可以看到头条的蜘蛛在1个月内访问了40多万次。频率太高，我们想告诉头条的蜘蛛你可不可以来的频率第一点。首先想到的就是robots文件告知，但是后面发现rbots文件对于头条的爬虫来讲不起作用，是的，头条的蜘蛛不遵守业内的robots文件规则。为何会出现这种情况呢，具体不得而知，因此我们将其定位为恶意爬虫一类实施了封禁。主要从nginx层面去封禁，阿里云的SLB服务似乎是没有提供针对某一个特定规则实施禁止访问的。</li>
+<li>为了将访问来源监控起来，避免像头条这样的蜘蛛的恶意爬取，在接口层面我们同时做了QPS的限制，当访问达到某一个阈值的时候会将接口进行限制。</li>
+</ul>
+<p>当然，以上的措施都是防君子不防小人的。只能说是从某一些方面去太高获取数据的门槛而已。</p>
+<h2 id="写在后面">写在后面</h2>
+<p>SEO优化是一个长期并需要持续进行的工作，希望的是可以利用好各种工具帮助我们分析总结优化的点，并持续行生产原创内容，这样我们的在搜索引擎上的曝光量才会在一个预期的范围呢。</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://omobruce.github.io/flutter-zi-gua-ying-gua-pei/">
+              <h3 class="post-title">
+                下一篇：flutter-自适应适配
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <div class="slogan">我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。</div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/OMOBruce" target="_blank">
+          <i class="fab fa-github"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  糖小喵zzz | <a class="rss" href="https://omobruce.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

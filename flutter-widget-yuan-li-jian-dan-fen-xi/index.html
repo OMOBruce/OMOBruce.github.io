@@ -1,0 +1,292 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>flutter-widget原理简单分析 | 糖小喵zzz</title>
+<meta name="description" content="我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://omobruce.github.io/favicon.ico?v=1589618212799">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://omobruce.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://omobruce.github.io">
+        <img class="avatar" src="https://omobruce.github.io/images/avatar.png?v=1589618212799" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://omobruce.github.io">
+        <h1 class="site-title">糖小喵zzz</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://omobruce.github.io/xiao-bao-de-mao" class="menu purple-link">
+            小宝的猫
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">flutter-widget原理简单分析</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2019-12-02</span>
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://omobruce.github.io/h8dWRs3k2/">
+                    flutter
+                    
+                  </a>
+                
+              </span>
+            
+          </div>
+          <div class="post-content">
+            <p>聊完了dart之后开始上手flutter开发，先从万物基于widget说起。。。</p>
+<!-- more -->
+<h1 id="widget">Widget</h1>
+<p>在flutter中，万物皆是widget。包括控件、动画、手势都是widget，app就是通过我们组合widget出来的。而在flutter中将所有的widget分为了两类，一个是StatelessWidget另一个是StatefulWidget，顾名思义就是一个有状态组件，一个无状态组件。这一点跟react就特别像了。但是widget并不是真正意义上我们所看到的样子。它只是描述element的一个配置文件。真正渲染在屏幕让我们看到的是element。简单的来讲就是widget规定了屏幕上的控件的展现形式。</p>
+<h2 id="widget的接口">widget的接口</h2>
+<pre><code>@immutable
+abstract class Widget extends DiagnosticableTree {
+  const Widget({ this.key });
+  final Key key;
+
+  @protected
+  Element createElement();
+
+  @override
+  String toStringShort() {
+    return key == null ? '$runtimeType' : '$runtimeType-$key';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.dense;
+  }
+
+  static bool canUpdate(Widget oldWidget, Widget newWidget) {
+    return oldWidget.runtimeType == newWidget.runtimeType
+        &amp;&amp; oldWidget.key == newWidget.key;
+  }
+}
+</code></pre>
+<ul>
+<li>可以看到widget是拥有一个key的，这个值与runtimeType决定了下次渲染的时候是否复用旧的widget。</li>
+<li>从createElement可以看到。当调用widget的时候会去创建个element对象。所以说widget是element的描述文件。</li>
+</ul>
+<h2 id="statelesswidget">StatelessWidget</h2>
+<p>无状态组件，意思就是该组件是没有状态的，一个静态组件，通常用来展示静态页面。同样的statelessWidget是继承自widget的。但是它重写了createElement方法。</p>
+<pre><code>@override
+StatelessElement createElement() =&gt; new StatelessElement(this);
+</code></pre>
+<p>可以看到将createElement方法用statelessElement来进行了重写。</p>
+<h2 id="statefulwidget">StatefulWidget</h2>
+<p>有状态组件，该组件是有状态的，可以通过改变状态表现不同的形式。同样statefullWidget是继承自widget的。同样也重写了createElement方法。同时新增了createState方法，。</p>
+<pre><code>abstract class StatefulWidget extends Widget {
+  const StatefulWidget({ Key key }) : super(key: key);
+
+  @override
+  StatefulElement createElement() =&gt; new StatefulElement(this);
+
+  @protected
+  State createState();
+}
+</code></pre>
+<p>createState方法用于外部多次调用并更改组将状态、并且createElement方法由statefulElement方法进行了重写。关于state在使用该有状态的组件的时候我们常常用到。</p>
+<h3 id="state">state</h3>
+<p>state是用来维护statefullWidget组将状态的，一个statefullWidget对应着个state实例，state中保存着该组将的状态。其中有两个属性值得注意：</p>
+<ol>
+<li>widget 它是表示state与widget实例的关联，由flutter framework设置，由于是有状态组将。但是state实例只会在创建该组件的时候生成。对应的widget在状态更改时可能会有改动，flutter framework会在widget改动会动态设置state.widget为新的widget。</li>
+<li>context，简单理解为该组将的上下文。</li>
+</ol>
+<h3 id="state的生命周期">state的生命周期</h3>
+<pre><code>class _CounterWidgetState extends State&lt;CounterWidget&gt; {  
+  int _counter;
+
+  @override
+  void initState() {
+    super.initState();
+    //初始化状态  
+    _counter=widget.initValue;
+    print(&quot;initState&quot;);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print(&quot;build&quot;);
+    return Scaffold(
+      body: Center(
+        child: FlatButton(
+          child: Text('$_counter'),
+          //点击后计数器自增
+          onPressed:()=&gt;setState(()=&gt; ++_counter,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void didUpdateWidget(CounterWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    print(&quot;didUpdateWidget&quot;);
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+    print(&quot;deactive&quot;);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    print(&quot;dispose&quot;);
+  }
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    print(&quot;reassemble&quot;);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    print(&quot;didChangeDependencies&quot;);
+  }
+
+}
+</code></pre>
+<p>通过一个计数器的小demo来说。当页面生成的时候、首先会调用initstate方法，该方法如上文所说，只会创建调用一次就是在页面生成的时候，就是statefulWidget组件插入widget树的时候</p>
+<ul>
+<li>didUpdateWidget方法，顾名思义。也就是widget状态发生变化的时候便会回调</li>
+<li>didChangeDependencies方法。是state依赖的发生变化。一个简单的栗子，我们全局更换主题颜色的时候</li>
+<li>setState方法，是我们手动更改设置widget状态时候通知组件rebuild的时候调用</li>
+<li>build方法。创建并渲染组件的时候，它会在页面生成、didUpdateWidget、 didChangeDependencies、setState后多次调用。作用就是build，很简单。就是build</li>
+<li>deactivate，当state被从widget树中移除的时候调用</li>
+<li>dispose，页面销毁时调用</li>
+</ul>
+<p><img src="https://omobruce.github.io/post-images/1575273970163.jpg" alt="" loading="lazy"><br>
+这个是statefullWidget的生命周期，看着是不是跟我们平时用的vue、react、小程序特别像。通过了解不同的生命周期函数我们便可以在页面的不同时间节点上做不一样的事情。</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://omobruce.github.io/flutter-de-zhi-cheng-yu-yan-dart/">
+              <h3 class="post-title">
+                下一篇：flutter的支撑语言dart
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <div class="slogan">我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。</div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/OMOBruce" target="_blank">
+          <i class="fab fa-github"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  糖小喵zzz | <a class="rss" href="https://omobruce.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

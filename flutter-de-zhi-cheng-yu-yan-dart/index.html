@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>flutter的支撑语言dart | 糖小喵zzz</title>
+<meta name="description" content="我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://omobruce.github.io/favicon.ico?v=1589618212799">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://omobruce.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://omobruce.github.io">
+        <img class="avatar" src="https://omobruce.github.io/images/avatar.png?v=1589618212799" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://omobruce.github.io">
+        <h1 class="site-title">糖小喵zzz</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://omobruce.github.io/xiao-bao-de-mao" class="menu purple-link">
+            小宝的猫
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">flutter的支撑语言dart</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2019-12-02</span>
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://omobruce.github.io/h8dWRs3k2/">
+                    flutter
+                    
+                  </a>
+                
+              </span>
+            
+          </div>
+          <div class="post-content">
+            <p>在拜读了美团团队对flutter的原理分析与实践之后，希望通过自己的理解将flutter的原理与基本要点做一次梳理、希望可以更好地深入理解这一套新的技术栈。</p>
+<!-- more -->
+<p>之前有讲过flutter的基本架构、那么在开始进入全新的开发体验之前有必要再次科普下相关的点。</p>
+<h2 id="dart">Dart</h2>
+<p>dart是谷歌在2011年推出来的一门全新的语言、意在取代JavaScript成为新一代的移动端开发语言。可是没想到JavaScript如此的坚挺，所以在随后几年中就渐渐没有了声音、再次火热起来是因为flutter的出现，dart焕发了第二春。dart是一门强类型的语言（这里简单吊打下JavaScript），并且是OO编程风格的语言。但是秉着语言再怎么变最终大家都是大同小异的原则，dart对前端er来说或许是极为友好的。</p>
+<h3 id="dart支持很多种模式进行运行">dart支持很多种模式进行运行</h3>
+<ol>
+<li>可以使用dart2js编译成JavaScript运行。没听错，就是JavaScript。</li>
+<li>使用dartVM运行正常的dart代码。</li>
+<li>最最最最厉害的是支持AOT编译成机器码直接运行。这就是为什么flutter 的性能为什么这么厉害的原因 了。</li>
+</ol>
+<h4 id="番外科普">番外科普：</h4>
+<p>关于JIT、AOT在安卓下的运行方式，以及为什么安卓下会有JIT、AOT方式来运行APP。<br>
+我们可能在刚接触安卓开发的时候都会看过或者了解过，为什么安卓选择了java作为开发语言。而java作为安卓的开发语言为安卓过去几年卡顿成为人人吐槽的点。<br>
+安卓为了使用java进行开发最开始在安卓内放了一个Dalvik虚拟机的东西。它负责干什么呢，它负责去解释执行java代码。将java代码编译成字节码然后再进行运行、可想而知在那个手机性能不高的年代、这种方式直接就导致了安卓上的app卡到让人崩溃。</p>
+<h5 id="jit">JIT</h5>
+<p>由于移动设备性能不高Dalvik虚拟机的执行效率极其低下的情况下，为了改善这么一个状态，谷歌爸爸搞了一个JIT(just-in-time)的方式来尝试改善这么一个情况。简单来讲就是当执行java代码的时候花费一些额外的时间来讲java直接编译成二进制文件，以方便下次执行同一个java代码的时候会更快一些。但是又遇到问题了。有些java代码调用会很少，所以不一定会将其进行编译成二级制文件、有些java代码编译成字节码的时间会少于编译成二进制文件、这就极其尴尬了。怎么看都不是一个完美的解决方案。所以那个时候我们用安卓的app会有初次启动的时候特别慢、后面用着用着就变快了，这也就是JIT技术所带来的效果。</p>
+<h5 id="odex">Odex</h5>
+<p>由于JIT的对app的性能优化是有限的，所有谷歌爸爸又搞了一个针对dex文件优化的模式。简单的来说就是每次手机开机的时候我们就会看到手机显示正在优化系统程序(xx/xx)，如果是毒瘤厂商、或者手机内安装的软件太多，这个时间会让你直接抓狂。</p>
+<h5 id="aot">AOT</h5>
+<p>似乎这些方法都没有很好的解决卡顿的问题。于是谷歌爸爸换了种方式。在app安装的时候就对代码进行优化这个就是AOT(Ahead-Of-Time)技术。通过在安装的时候对代码进行了预编译。这样一来虽然增加了安装app的时间换来了app的运行速度。</p>
+<h3 id="完整的类型系统">完整的类型系统</h3>
+<p>dart具有完整的类型系统，支持静态类型检查与运行时的类型检查。写起来就会方便简单很多</p>
+<h3 id="大量的底层库支持">大量的底层库支持</h3>
+<p>dart也是拥有超级多的类库的，在官方的pub上可以找到大量的优质类库</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://omobruce.github.io/qian-duan-er-de-app-zhi-lu-kai-shi/">
+              <h3 class="post-title">
+                下一篇：前端er的app之路-开始
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <div class="slogan">我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。</div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/OMOBruce" target="_blank">
+          <i class="fab fa-github"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  糖小喵zzz | <a class="rss" href="https://omobruce.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

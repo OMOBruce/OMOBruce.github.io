@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>聊一聊前端的错误监控(一) | 糖小喵zzz</title>
+<meta name="description" content="我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://omobruce.github.io/favicon.ico?v=1589618212799">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://omobruce.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://omobruce.github.io">
+        <img class="avatar" src="https://omobruce.github.io/images/avatar.png?v=1589618212799" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://omobruce.github.io">
+        <h1 class="site-title">糖小喵zzz</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://omobruce.github.io/xiao-bao-de-mao" class="menu purple-link">
+            小宝的猫
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">聊一聊前端的错误监控(一)</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2020-04-27</span>
+            
+          </div>
+          <div class="post-content">
+            <p>当我们的项目还是单车摩托的时候，项目的错误与异常似乎我们是不太关心的，本着能用就行的原则疯狂的迭代，同事曾常开玩笑说，只有我的迭代速度足够快，bug就追不上我。但是随着DAU的增长，一千，一万，十万。当用户的反馈如潮水般涌来的时候，这个时候能够快速定位错误并解决它成了我们的头等大事，毕竟一个稳定的产品才是留住用户的根基。那么在面对复杂的用户使用环境下，我们如何构建一个完整且有效的监控体系就显得尤为重要了。</p>
+<!-- more -->
+<p>有时候我们在开发或者测试环境甚至线上环境中，在使用中都发现不了问题，往往却在用户手里却出现了问题，那么这个时候怎么办呢，这里记录下在构建一个简单可用的错误监控的一些经验与方向。</p>
+<h2 id="使好javascript的error">使好JavaScript的Error</h2>
+<p>我们享受着JavaScript为我们带来的便捷却不得不忍受着JavaScript的痛苦，我们都曾为了浏览器控制台那串红色的代码头疼，单线程的运行机制一旦出现堆栈错误就将程序直接挂掉，弱类型的脚本语言特性让我们无法在写代码的时候很好的去规避错误。那么怎么更好的去收集统计错误呢？其实JavaScript为我们提供了入口的。可以在MDN上找到详细的说明https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Error</p>
+<h3 id="error">Error</h3>
+<p>在JavaScript的标准库中，它为我们提供了多个类型的错误抛出，这里先简单介绍下，后续我们通过这些错误来定位并收集错误</p>
+<ul>
+<li>Error通过这个方法我们可以手动向外面抛出一个错误，使用Error方法往往是在某些业务场景下的需求。</li>
+</ul>
+<pre><code class="language-javascript">    throw new Error('error');
+    // this:
+    const x = Error('I was created using a function call!');
+​​​     ​// has the same functionality as this:
+    const y = new Error('I was constructed via the &quot;new&quot; keyword!');
+</code></pre>
+<p>通常我们能通过传入Error构造函数来抛出异常，而在Error的prototype上会为我们提供几个属性，分别是columNumber、fileName、lineNumber、message、name、stack。其中columNumber、lineNumber、fileName、stack是浏览器为我们提供支持的。通过这些属性我们便可以准备得到报错的具体位置。</p>
+<h3 id="evalerror">EvalError</h3>
+<p>这个一个关于eval的错误方法，它接受三个参数，分别是message、fileName、lineNumber。</p>
+<pre><code class="language-javascript">    try {
+        throw new EvalError('Hello', 'someFile.js', 10);
+    } catch (e) {
+        console.log(e instanceof EvalError); // true
+        console.log(e.message);              // &quot;Hello&quot;
+        console.log(e.name);                 // &quot;EvalError&quot;
+        console.log(e.fileName);             // &quot;someFile.js&quot;
+        console.log(e.lineNumber);           // 10
+        console.log(e.columnNumber);         // 0
+        console.log(e.stack);                // &quot;@Scratchpad/2:2:9\n&quot;
+    }
+</code></pre>
+<p>其中fileName、lineNumber虽然不是标准中定义，但是我们仍然可以在场景下使用获得具体的错误信息。</p>
+<h3 id="internalerror">InternalError</h3>
+<p>该错误是JavaScript引擎的内部错误，通常由引擎抛出，但是该错误是非标准的所以也建议不要要在生产环境中去使用它，大部分浏览器都暂时未支持它，所以仅供了解了解就好</p>
+<pre><code class="language-javascript">    new InternalError([message[, fileName[, lineNumber]]])
+</code></pre>
+<h3 id="rangeerror">RangeError</h3>
+<p>官方给出的对该错误的定义是：RangeError对象表明一个错误，当一个值不在其所允许的范围或者集合内的时候，通常我们看到的该错误如下类似：</p>
+<pre><code class="language-javascript">    RangeError: Maximum call stack size exceeded
+</code></pre>
+<p>超出最大调用堆栈大小，也就是说越界错误，常见于我们设置的变量或者方法超过了设置的内存栈上限时候，需要注意代码中的逻辑。</p>
+<h3 id="referenceerror">ReferenceError</h3>
+<p>引用错误，这个可能是我们在平时遇到的最多的报错之一了，顾名思义，最简单的触发条件就是引用一个未被定义的变量的时候就会抛出ReferenceError错误。</p>
+<pre><code class="language-javascript">    var a = undefinedVariable;
+    //ReferenceError undefinedVariable is not defined
+</code></pre>
+<h3 id="syntaxerror">SyntaxError</h3>
+<p>同样是我们常见的错误之一，表示是语法错误。通常是我们使用了不符合规范的语法的时候，</p>
+<pre><code class="language-javascript">    function(){
+        if
+    }
+    //Uncaught SyntaxError: Function statements require a function name
+</code></pre>
+<h3 id="typeerror">TypeError</h3>
+<p>类型错误，通常是变量值并非预期类型的时候抛出，同样是常见错误之一，因此在使用变量类型的原型方法的时候一定要注意该变量的值是否是固定类型。</p>
+<pre><code class="language-javascript">    null.toStriong()
+    //Uncaught TypeError: Cannot read property 'toStriong' of null
+</code></pre>
+<h3 id="urierror">URIError</h3>
+<p>通常是我们在使用了decodeURIComponent/encodeURIComponent方法处理了不是正确链接的时候抛出的错误</p>
+<pre><code class="language-javascript">    decodeURIComponent('%');
+    //Uncaught URIError: URI malformed
+</code></pre>
+<p>了解JavaScript的各种错误抛出的含义，后面我们才能对各种错误的业务场景下做出不同的分类与收集，并作出对应的兜底策略。其中比较关键的几个Error的字段分别是：</p>
+<ul>
+<li>fileName</li>
+<li>message</li>
+<li>stack</li>
+<li>name</li>
+</ul>
+<p>通过以上的几个字段我们才能比较准确的去定位一个错误抛出的具体位置。虽然其中columnNumber不是标准中定义，但是我们仍然可以通过一些方法来获取其错误位置。<br>
+那么接下来，我们就通过收集这部分错误异常来构建一个简单的错误收集sdk。</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://omobruce.github.io/zai-xiao-cheng-xu-shang-gao-yi-gao-socket/">
+              <h3 class="post-title">
+                下一篇：小程序上的WebSocket
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <div class="slogan">我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。</div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/OMOBruce" target="_blank">
+          <i class="fab fa-github"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  糖小喵zzz | <a class="rss" href="https://omobruce.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

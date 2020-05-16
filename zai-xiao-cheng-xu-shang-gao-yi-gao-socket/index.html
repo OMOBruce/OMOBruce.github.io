@@ -1,0 +1,326 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>小程序上的WebSocket | 糖小喵zzz</title>
+<meta name="description" content="我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://omobruce.github.io/favicon.ico?v=1589618212799">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://omobruce.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://omobruce.github.io">
+        <img class="avatar" src="https://omobruce.github.io/images/avatar.png?v=1589618212799" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://omobruce.github.io">
+        <h1 class="site-title">糖小喵zzz</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://omobruce.github.io/xiao-bao-de-mao" class="menu purple-link">
+            小宝的猫
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">小程序上的WebSocket</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2020-04-20</span>
+            
+          </div>
+          <div class="post-content">
+            <p>在浏览器时代似乎做一个websocket并非一件难事，市面已经有了太多完整成熟的方案，苦于早起的小程序并不能支持npm等三方包的使用，因此想要使用websocket来做些事情就需要自己动手了，趁这段时间正好在整理项目于是就记录下关于小程序上去封装一个简单可用的socket sdk。</p>
+<!-- more -->
+<h2 id="结构">结构</h2>
+<p>浏览器中对websocket有着完整的接口定义。当然小程序中也有，那么构建一个完整的sdk需要我们对外提供哪些接口呢？按照HTML5中对websocket的接口定义，同样我们可以对外提供大部分相同的接口，当然某些逻辑我们希望是针对使用者是黑盒以此来简化接口复杂度。大致理了理：</p>
+<ul>
+<li>socket连接</li>
+<li>socket断开</li>
+<li>socket状态</li>
+<li>socket消息发送</li>
+<li>socket消息接收</li>
+</ul>
+<p>当然我们同时希望在内部做些逻辑处理，而这部分逻辑是不希望暴露出去的：</p>
+<ul>
+<li>断线重连</li>
+<li>异常抛出</li>
+<li>心跳</li>
+</ul>
+<p>整个简单结构大致如下：<br>
+<img src="https://omobruce.github.io/post-images/1587483799022.png" alt="" loading="lazy"></p>
+<h2 id="开始干">开始干</h2>
+<p>因为是小程序端使用的sdk，因此部分api是小程序，写法使用typescript，主要是大致逻辑与部分细节问题，为了避免对sdk进行多次实例化处理，这里推荐使用单例模式将实例化的对象挂在在全局对象上。以此避免一些未知错误，由于设置websocket只需要设置一次监听回调函数因此在内部监听设置也只需要设置一次。</p>
+<pre><code class="language-javascript">    class Socket {
+        private readonly WS: string = 'wss://xxxx';
+        private readonly HEARTBEAT: number = 45000;    //心跳包时间
+        private readonly ALIVETIME: number = 60000;    //最大存活时间
+        private socketTask: WechatMiniprogram.SocketTask | undefined;
+        private STATE: socketState = 'CLOSED';
+        private timer: number | undefined;
+        private registerList: IRegister = {};
+        private disconnect: boolean = false;
+        private connectTime: number = 0;
+        private token: string = '';
+        constructor() {
+            //全局只注册一次
+            this.onState();
+        }
+        /** 监听socket连接 */
+        private onState(): void {
+            wx.onSocketOpen((result: WechatMiniprogram.OnSocketOpenCallbackResult) =&gt; {
+                console.log(result, 'open');
+                //todo something
+                this.STATE = 'OPEN';
+                this.connectTime = new Date().getTime();
+                this.heartbeat();
+            });
+            wx.onSocketClose((result: WechatMiniprogram.OnSocketCloseCallbackResult) =&gt; {
+                console.log(result, 'close');
+                //todo something
+                this.STATE = 'CLOSED';
+                this.retryConnect(result);
+            });
+            wx.onSocketMessage((message: WechatMiniprogram.OnSocketMessageCallbackResult) =&gt; {
+                //todo something
+                this.dispatchMessage(message);
+            });
+            wx.onSocketError((error: WechatMiniprogram.OnSocketErrorCallbackResult) =&gt; {
+                console.log(error, 'error');
+                //todo something
+                this.STATE = 'CLOSED';
+            });
+        }
+    }
+    export default new Socket();
+</code></pre>
+<p>通过构造函数一次性申明我们所有的监听函数并在监听函数的回调里去做我们对应的事情，按照标准的websocket为外部同时提供了socket状态的方法，以便我们在业务逻辑中方便获取当前的连接状态。值得注意的一点是我们需要跟服务端沟通好close的时候的状态码，当然这部分状态码也是由标准接口提供了一份说明：<br>
+<img src="https://omobruce.github.io/post-images/1587483809372.png" alt="" loading="lazy"><br>
+<img src="https://omobruce.github.io/post-images/1587483814972.png" alt="" loading="lazy"><br>
+我们需要针对不同的状态码对其做针对性处理。</p>
+<h3 id="初始化sdk">初始化sdk</h3>
+<p>往往针对不同的业务场景我们需要的配置的参数不尽相同，之前有提到，websocket的连接建立是依赖于http协议的，那么同样我们可以在建立连接的时候增加我们的鉴权信息保证我们的socket能正确连上后端服务器。同时我们可能也希望可以自定义超时时间、心跳时间、连接地址...等参数。那么在初始化的时候就需要将这部分参数传入然后sdk来帮助我们进行初始化：</p>
+<pre><code class="language-javascript">public async init(params: IInit): Promise&lt;Socket&gt; {
+        //不是断开连接的时候统一拒绝
+        if (this.STATE != 'CLOSED') return this;
+        //获取授权信息
+        if (typeof params.token === 'function') {
+            this.token = await params.token();
+        } else {
+            this.token = params.token;
+        }
+        let that = this;
+        return new Promise((resolve: any, reject: any) =&gt; {
+            this.socketTask = wx.connectSocket({
+                url: this.WS,
+                header: {
+                    token: this.token
+                },
+                success(res: any) {
+                    that.STATE = 'CONNECTING';
+                    console.log(res);
+                    resolve(that);
+                },
+                fail(err: any) {
+                    console.log(err);
+                    reject(that);
+                },
+            });
+        });
+    }
+</code></pre>
+<p>以上，我们可以在请求头中增加我们的自定义字段，来与后端进行交互，一个需要注意的细节，为了保证连接的正常发起，自定请求头的字段与字段值的大小最好不要超过服务端设置的大小，具体说明可以参照http协议部分。另一个需要注意的是，真正意义上的连接建立成功是在open回调函数后。这个时候客户端与服务端的连接才算建立完成。另一个是发送接口一定要check数据是否发送完成，当然发送数据的大小也是有限制的。</p>
+<h3 id="关于重试">关于重试</h3>
+<p>在成功建立连接之后并不就是万事顺利了，websocket是会断掉的。无论是在浏览器端还是移动端，特别是移动端网络比较复杂的情况下，我们需要考虑如何优雅并且节省资源对socket进行生命维系。主要是从两个方面去考虑</p>
+<blockquote>
+<p>一、我们需要设置心跳包来告诉服务器，我们客户端还活着，不要断开我。这个是服务端的一个机制，主要是为了考虑服务端综合性能，会在客户端一段时间没有响应后主动断开此次连接<br>
+二、是在各种异常情况下的导致客户端主动断开websocket连接，比如网络切换。</p>
+</blockquote>
+<h4 id="断线重连">断线重连</h4>
+<p>这个其实比较容易去实现它，websocket为我们提供了现成的接口，并且会在监听回调中告诉你为什么断掉，这个时候我们执行重连就好了，但是问题来了，我们总不能让客户端无限制的重连对吧。这个时候就需要去考虑我们需要设置一个最大连接次数比如5、10。这个可以根据业务中具体的场景来动态规划他。而我们在此基础加上了一个最大存活时间限制，如果一次session中，发现同一种断开的状态码并且每次重连成功后的存活时间都不超过我们设定的最低阈值那么我们会在达到重连次数上限后放弃该客户端的重连。以此来保证不必要的性能开销。</p>
+<pre><code class="language-javascript">    /** 重新连接尝试 */
+    private retryConnect(result: WechatMiniprogram.OnSocketCloseCallbackResult): void {
+        //禁止连接或者存活时间过短的时候取消重连
+        if (this.disconnect || (new Date().getTime() - this.connectTime) &lt;= this.ALIVETIME || result.code === 1000) return;
+        this.init({
+            token: () =&gt; this.token
+        });
+    }
+</code></pre>
+<h4 id="关于心跳">关于心跳</h4>
+<p>关于心跳这块儿的教程网上有很多方案。主要是关于心跳时长的讨论，当然最简单的就是我们定一个固定的时间间隔。当然有条件的还可以尝试动态心跳包的方案。这里只是做下简单说明。</p>
+<blockquote>
+<p>什么是心跳？顾名思义，就像心跳一样，我们可以认为我们是需要隔段时间就向服务端发送一次信息告诉服务端我还活着，不要干掉我，js的话可以使用定时器来实现这个心跳，说到这里，可能会想，那这样的话跟我普通的轮询方案有啥区别，都是用定时器向服务器发送消息。当然不一样。虽然http1.1之后我们可以设置keep-alive来告诉服务器，我下面的连接可以复用该次tcp连接来发送请求，但是但是但是，长时间后呢？websocket连接成功之后是直接走tcp向服务端发送请求的。就已经省去3次握手操作了。</p>
+</blockquote>
+<h4 id="固定心跳">固定心跳</h4>
+<p>最简单的方式实现用js的定时器定时向服务器发送一次消息，当然格式可以自己定义，但是需要业务场景的语义进行区分，</p>
+<pre><code class="language-javascript">    private heartbeat(): void {
+        if (this.timer) clearInterval(this.timer);
+        let that = this;
+        this.timer = setInterval(() =&gt; {
+            that.send('ping');
+        }, this.HEARTBEAT);
+    }
+</code></pre>
+<p>当我们成功发送心跳包后服务端会返回我们对应的信息。如果服务端没有响应就需要对本次连接进行处理了。<br>
+<img src="https://omobruce.github.io/post-images/1587483826007.png" alt="" loading="lazy"></p>
+<h4 id="动态心跳">动态心跳</h4>
+<p>动态心跳其实是对固定心跳的一种优化，当我们的连接很稳定，其实是不需要每隔一个固定的时间去与服务器进行交互，这样的心跳包其实也是一种性能开销，那么就需要动态心跳以不同的时间间隔来与服务端进行连接的存活确认。这个时间间隔我们可以根据自己的业务场景去确定具体的心跳时间。当然这个方案也是需要服务端的同学进行一些改造的不然会造成客户端心跳发送时间未到，服务端却因为超过心跳最大时间而导致连接断开。这里可以参考下下tcp的超时重试机制里的指数退避算法。虽然没有那么高端，但是我们可以将其简化下。一个简单栗子，当我们首次心跳的时间是30s、当服务端成功响应后我们是不是可以将下一次的心跳时间适度延迟一些呢？比如60s，那么再下一次呢？90s？这个可以在具体业务场景中具体实施，当然采用动态心跳的时候我们需要告诉服务端我们的心跳时间是多少。这里其实可以推荐一个叫STOMP协议的库，它叫简单(流)文本定向传输协议，在websocket中他会在每次请求的时候带上当前客户端的部分信息给服务器处理包括心跳时间、内容、header内容。那么我们的动态心跳方案或许就可以采用类似的格式，前提是要与服务端同学商量格式解析。</p>
+<pre><code class="language-javascript">    private heartbeat(): void {
+        if (this.timer) clearInterval(this.timer);
+        let that = this;
+        this.timer = setInterval(() =&gt; {
+            that.send('ping:3000');
+        }, this.HEARTBEAT);
+    }
+</code></pre>
+<p>以上是最简单的方式告知服务端我下一次的心跳时间是间隔多久。</p>
+<h3 id="关于消息处理">关于消息处理</h3>
+<p>我们知道，websocket是支持二进制与文本文件传输的。那么收到消息之后我们怎么去处理呢。以及消息格式怎么处理呢？这个可以我们根据具体需要去做针对处理，当然目前可能最为流行的就是json字符串类型。对前端极为友好，数据结构需要前后端商量好就行了。这里主要是说下如何在多种消息类型下与业务逻辑进行耦合。在sdk中我们定义一个register方法主要是用来处理消息的分发。这里需要了解一种思想叫发布订阅模式(观察者模式)，通过这种设计模式来处理服务端发送过来的消息并且分发至不同的订阅对象上。</p>
+<pre><code class="language-javascript">    /** 消息处理 */
+    private dispatchMessage(message: WechatMiniprogram.OnSocketMessageCallbackResult | undefined): void {
+        //忽略心跳
+        if (message?.data === 'pong') return;
+        //处理消息 只兼容string格式，二进制类型暂不支持
+        const data: IMessage = JSON.parse(message?.data.toString() || '');
+        const pageType: string = data?.message?.pageType || '';
+        //是否需要分发消息，
+        if (this.registerList[pageType]) {
+            this.registerList[pageType].forEach((item: (params: any) =&gt; void) =&gt; item(data?.message?.message));
+        } else {
+            console.warn('暂时没有地方去哦');
+        }
+    }
+    /** 注册事件 */
+    public register(name: string, callback: (params: any) =&gt; void): void {
+        if (this.registerList[name]) {
+            this.registerList[name].push(callback);
+        } else {
+            this.registerList[name] = [callback];
+        }
+    }
+</code></pre>
+<p>通过缓存我们以某一个标识为key的对象并将其值设置为需要回调的函数数组，在接受到服务端信息的时候通过遍历对应key下的数组来将信息分发至不同的订阅者下。</p>
+<p>通过以上几步那么一个简单的websocket sdk就可以完成了，当然其中仍然会有很多细节需要考虑，这里就不一一赘述了。<br>
+peace！</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://omobruce.github.io/liao-yi-liao-web-socketyi/">
+              <h3 class="post-title">
+                下一篇：聊一聊web socket(一)
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <div class="slogan">我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。</div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/OMOBruce" target="_blank">
+          <i class="fab fa-github"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  糖小喵zzz | <a class="rss" href="https://omobruce.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

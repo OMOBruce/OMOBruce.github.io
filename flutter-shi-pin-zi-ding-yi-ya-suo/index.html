@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>flutter 视频自定义压缩 | 糖小喵zzz</title>
+<meta name="description" content="我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://omobruce.github.io/favicon.ico?v=1589618212799">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://omobruce.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://omobruce.github.io">
+        <img class="avatar" src="https://omobruce.github.io/images/avatar.png?v=1589618212799" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://omobruce.github.io">
+        <h1 class="site-title">糖小喵zzz</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://omobruce.github.io/xiao-bao-de-mao" class="menu purple-link">
+            小宝的猫
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">flutter 视频自定义压缩</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2020-02-07</span>
+            
+          </div>
+          <div class="post-content">
+            <p>作为UI框架的flutter来说，涉及到耗时任务或者是原生能力的时候就显得不是那么得心应手了.最近在开发视频相关的功能的时候正好有这方面需求借此机会把相关踩的坑给记录下来</p>
+<!-- more -->
+<h1 id="ios视频压缩">ios视频压缩</h1>
+<p>当刚开始做这个功能的时候一脸懵逼，ios压缩该怎么做，首先蹦入脑海的是视频处理神器<code>ffmpeg</code>，作为无所不能的开源库，让我们这种小白可以很轻松的针对视频文件做任何处理。一顿搜索后发现，似乎ffmpeg放在ios只做压缩有点大材小用并且特么占空间。偶然间发现了ios自带的视频处理库<code>AVFoundation</code>,这货便可以满足我们大部分简单的需求。并且苹果已经帮我们简单封装了好了<code>AVAssetExportSession</code>，想想还挺贴心的。简单翻了下这个框架的相关文档，</p>
+<blockquote>
+<p>AVFoundation是可以用它来播放和创建基于时间的视听媒体的几个框架之一，它提供了基于时间的视听数据的详细界别上的OC接口。可以用它来检查、创建、编辑、重新编码媒体文件。也可以从设备得到输入流和实时捕捉回放过程中操控视频<br>
+<img src="https://omobruce.github.io/post-images/1581064889228.webp" alt="" loading="lazy"></p>
+</blockquote>
+<h2 id="av-foundation核心构成">AV Foundation核心构成</h2>
+<p>AV Foundation的几个最主要的支撑框架及其提供的功能：</p>
+<ul>
+<li>Core Audio<br>
+OSX和iOS上处理所有音频事件的框架，是由多个框架整合在一起的总称。为音频和MIDI内容的录制、播放和处理提供相应接口，也提供高层级的接口，比容通过Audio Queue Services框架所提供的那些接口，主要处理基本的音频播放和录音相关功能。也提供相对低层级的接口</li>
+</ul>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://omobruce.github.io/flutter-cha-jian-pian/">
+              <h3 class="post-title">
+                下一篇：flutter插件篇
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <div class="slogan">我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。</div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/OMOBruce" target="_blank">
+          <i class="fab fa-github"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  糖小喵zzz | <a class="rss" href="https://omobruce.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

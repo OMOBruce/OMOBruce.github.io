@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>记一次前端项目迁移 | 糖小喵zzz</title>
+<meta name="description" content="我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://omobruce.github.io/favicon.ico?v=1589618212799">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://omobruce.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://omobruce.github.io">
+        <img class="avatar" src="https://omobruce.github.io/images/avatar.png?v=1589618212799" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://omobruce.github.io">
+        <h1 class="site-title">糖小喵zzz</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://omobruce.github.io/xiao-bao-de-mao" class="menu purple-link">
+            小宝的猫
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">记一次前端项目迁移</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2019-12-23</span>
+            
+          </div>
+          <div class="post-content">
+            <p>最近小打卡的圈主运营后台时不时爆出请求超时的异常，本着刻苦专研技术的精神。希望可以找出超时的问题，大多数情况下都没有问题的后台为啥会出现请求超时的问题。在请教了后端大佬们后得知管理后台的有部分静态资源请求超时了。刚听到这个消息的时候一脸懵逼。满脸黑人问号，静态资源为什么会请求超时？</p>
+<!-- more -->
+<p><img src="https://omobruce.github.io/post-images/1577085471134.png" alt="" loading="lazy"><br>
+从上图的脑图可以看到小打卡的运营后台是跑在tomcat里面的，至于为什么一个前端项目并且在前端技术栈如此丰富的今日还会将一个纯前端项目放进tomcat就不知道了，可能是因为历史包袱吧~~~ 。</p>
+<h2 id="排查">排查</h2>
+<p>首先先要复现这个问题。那么打开浏览器并打开控制台访问管理后台，盯着网络请求的变化。<br>
+<img src="https://omobruce.github.io/post-images/1577086517166.png" alt="" loading="lazy"><br>
+初看上去似乎没啥问题。虽然其中的响应时间在对应大小的资源下不算快，但也不至于超时昂~。于是无聊的又刷新了几次，想能够复现这个问题。<br>
+<img src="https://omobruce.github.io/post-images/1577086679403.png" alt="" loading="lazy"><br>
+这个时候发现似乎有什么不对劲的地方，怎么发现有些资源文件走了memory cache有些又没有走缓存呢？？？随意点看了一个没有从缓存获取的js文件瞅了瞅。<br>
+<img src="https://omobruce.github.io/post-images/1577086867265.png" alt="" loading="lazy"><br>
+原来是设置了不缓存该文件呐，可是回头一想为啥不缓存该资源文件呢？每次都去重新请求资源浪费时间不说，还会对服务器造成一定的请求压力~可是还是没有清楚找到请求超时的问题，但是大概方向也许是清楚了。<br>
+项目是放在tomcat中，那么静态资源也应该是走了tomcat处理的，为了验证这个想法，去看了看构建命令<br>
+<img src="https://omobruce.github.io/post-images/1577087467418.png" alt="" loading="lazy"><br>
+呃、、、看样子似乎是这样的了。可是为什么tomcat会让静态资源的请求超时掉呢？？？作为一枚小白于是乎开始翻资料(百度)，</p>
+<h3 id="tomcat对于静态资源的处理流程小白版">tomcat对于静态资源的处理流程(小白版)</h3>
+<p>tomcat对于静态资源的请求都会交给一个叫做defaultServlet的类来处理，defaultServlet中会将请求交给一个serveResource的方法来处理。这个方法里做了很多事情，然后通过将静态文件的输入流放到输出流中这样便完成了静态资源的读取。这里猜测是请求一个静态资源要经过这么多道实打实的工序，那是不是超时的时候就是性能瓶颈的时候呢？由于是小白不太了解这内部具体的实现，查看了相关资料发现tomcat也是可以配置静态资源缓存的。But，本着专研技术的精神，一不做二不休。将项目迁走吧，让他回归前端母亲的怀抱看来是最好的。</p>
+<h2 id="准备迁移">准备迁移</h2>
+<h3 id="接口">接口</h3>
+<p>由上图可以知道我们的管理后台服务现在是有两种请求方式的。一个是直接通过公网接口获取数据，一种是内网接口获取数据。那么第一步就是需要整理出来哪些接口是内网的哪些是公网的。为什么要做一步呢。因为我们接下来会引入node中间层服务来帮助我们去对接后端各个不同的子系统，而不用前端去各种直接请求接口导致懵逼。</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://omobruce.github.io/xiao-da-qia-qian-duan-zai-seo-zhong-de-shi-jian/">
+              <h3 class="post-title">
+                下一篇：小打卡-前端在SEO中的实践
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <div class="slogan">我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。</div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/OMOBruce" target="_blank">
+          <i class="fab fa-github"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  糖小喵zzz | <a class="rss" href="https://omobruce.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

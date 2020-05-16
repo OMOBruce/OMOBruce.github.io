@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>flutter-自适应适配 | 糖小喵zzz</title>
+<meta name="description" content="我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://omobruce.github.io/favicon.ico?v=1589618212799">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://omobruce.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://omobruce.github.io">
+        <img class="avatar" src="https://omobruce.github.io/images/avatar.png?v=1589618212799" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://omobruce.github.io">
+        <h1 class="site-title">糖小喵zzz</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://omobruce.github.io/xiao-bao-de-mao" class="menu purple-link">
+            小宝的猫
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">flutter-自适应适配</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2019-12-03</span>
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://omobruce.github.io/h8dWRs3k2/">
+                    flutter
+                    
+                  </a>
+                
+              </span>
+            
+          </div>
+          <div class="post-content">
+            <p>flutter开发中的适配是最让人头疼的一个问题，所以需要引入自适应布局的方式来解决不同分辨率不同屏幕尺寸的适配问题。</p>
+<!-- more -->
+<h1 id="如何适配不同尺寸的屏幕">如何适配不同尺寸的屏幕</h1>
+<p>首先我们需要明白的是我们平时写样式的时候中的1px是真正的1px吗？很早很早之前确实是我们写1px就是对应着设备的1像素，可是后来这个规律不适用了，因为后面老乔爷子搞了一个叫Retina技术的东西，这个技术就是把原本1像素的东西用了屏幕4个物理像素点或者更多来渲染，那么这个时候1px对应的就不再是一个物理像素了。这里需要引入几个知识点：</p>
+<ul>
+<li>逻辑像素 简单的来讲就是我们写样式时候用的像素单位(注意：这里的逻辑像素不是一个固定值，也就是说我们写的1px在不同屏幕上是不一样大的，他只是描述一个设备上的像素一个抽象单位)</li>
+<li>物理像素 设备上屏幕的真正显示的像素点</li>
+<li>设备的DPR 也就是 物理像素/逻辑像素的比值，意义就是可以知道1个逻辑像素是需要几个物理像素来进行渲染的。</li>
+</ul>
+<p>有了以上认识之后我们似乎就可以利用设备DPR来做不同屏幕上的自适应了，可以让不同屏幕下的布局都保持一个相对正常的比例。</p>
+<h2 id="利用dpr做自适应">利用DPR做自适应</h2>
+<p>在flutter获取屏幕信息十分简单，利用mediaQuery就可以获取当前屏幕的各种参数，</p>
+<pre><code>  static MediaQueryData mediaQuery = MediaQueryData.fromWindow(window);
+	static double _pixelRatio = mediaQuery.devicePixelRatio;
+  static double _width = mediaQuery.size.width;
+  static double _height = mediaQuery.size.height;
+</code></pre>
+<p>利用mediaQuery我们分别获取到设备的宽高以及DPR，利用DPR来实现实现真正的1px的效果，利用宽来做自适应的比例缩放。</p>
+<pre><code>class AutoWidth {
+  static MediaQueryData mediaQuery = MediaQueryData.fromWindow(window);
+  static double _width = mediaQuery.size.width;
+  static double _height = mediaQuery.size.height;
+  static double _dpr = mediaQuery.devicePixelRatio;
+  static var _ratio;
+
+  static init(int width) {
+    int _w = width is int ? width : 750;
+    _ratio = _width / _w;
+  }
+
+  static px(int number) {
+    if(!(_ratio is double || _ratio is int)) AutoWidth.init(750);
+    return double.parse((number*_ratio).toStringAsFixed(2));
+  }
+
+  static pxInt(int number) {
+    if(!(_ratio is double || _ratio is int)) AutoWidth.init(750);
+    return (number*_ratio).toInt();
+  }
+  
+  static onePx() {
+    return 1/_dpr;
+  }
+}
+</code></pre>
+<p>分别对外提供了三个静态方法，其中获取动态长度分别提供了int类型的返回值、double的返回值可以用在不同的地方。这里我们是假设我们拿到的设计稿宽度都是统一的750的。</p>
+<h2 id="问题">问题</h2>
+<p>由于flutter的设计问题，每当我们从主函数启动程序的时候，获取屏幕尺寸与flutter的执行是异步的所以会有几率导致我们进入页面之后仍然未获取到正常的屏幕尺寸。因此我们需要在开始执行主函数的时候去等待屏幕尺寸的获取。虽然说flutter官方的做法有利于更快启动app。但是我们可以牺牲一点启动速度来换取完整的加载布局体验。</p>
+<pre><code>void _buildTime(context) {
+    if(MediaQueryData.fromWindow(window).size.isEmpty) {
+      window.onMetricsChanged = () {
+        window.onMetricsChanged = null;
+        Navigator.pushReplacement(context, FadeRoute(page: IndexPage()));
+      };
+    }else{
+      Navigator.pushReplacement(context, FadeRoute(page: IndexPage()));
+    }
+  }
+  @override
+  void initState() {
+    super.initState();
+    const time = Duration(seconds: 2);
+    Timer(time, () {
+      WidgetsBinding.instance.addPostFrameCallback((callback) {
+        _buildTime(context);
+      });
+    });
+  }
+</code></pre>
+<p>通过在初始化第一个页面或者在主函数里使用回调的方式来轮询是否已经成功获取屏幕尺寸，但是这里有个问题，需要设置一个超时时间。无法正常获取的时候需要作出一个兜底页面重启或者是告知用户。我这里是用了一个引导页（闪屏页）来做的。需要在具体业务场景具体分析。</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://omobruce.github.io/flutter-zu-jian-xi-lie-text/">
+              <h3 class="post-title">
+                下一篇：flutter组件系列-Text
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <div class="slogan">我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。</div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/OMOBruce" target="_blank">
+          <i class="fab fa-github"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  糖小喵zzz | <a class="rss" href="https://omobruce.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

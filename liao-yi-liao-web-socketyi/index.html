@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>聊一聊web socket(一) | 糖小喵zzz</title>
+<meta name="description" content="我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://omobruce.github.io/favicon.ico?v=1589618212799">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://omobruce.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://omobruce.github.io">
+        <img class="avatar" src="https://omobruce.github.io/images/avatar.png?v=1589618212799" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://omobruce.github.io">
+        <h1 class="site-title">糖小喵zzz</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://omobruce.github.io/xiao-bao-de-mao" class="menu purple-link">
+            小宝的猫
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">聊一聊web socket(一)</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2020-04-16</span>
+            
+          </div>
+          <div class="post-content">
+            <p>听到WebSocket可能大家想到的就是聊天，不用轮询机制来获取信息。由于之前项目中有使用这个技术，就将该技术在使用中的一些经验沉淀下来</p>
+<!-- more -->
+<h2 id="什么是websocket">什么是WebSocket</h2>
+<blockquote>
+<p>它是在HTML5上定义的一个API，使得web页面可以使用WebSockets协议与远程主机进行双向通讯，因此它是一个全双工通道的协议，并且是通过维护两个连接来模拟双工通道的。因此相对于轮询的方式，会节省很多开销与流量。<br>
+用通俗的话来讲就是用了WebSocket后服务器就可以主动给客户端推送消息，而不是客户端无脑的隔一段时间去请求一次服务器查询有无新消息，当然除了服务器可以主动给客户端发送消息之外，客户端也可以给服务端发送消息。毕竟这是个双向平等的协议嘛。<br>
+那么websocket除了以上特点还有以下几个特征：</p>
+</blockquote>
+<ul>
+<li>基于TCP协议实现的</li>
+<li>与HTTP协议兼容</li>
+<li>数据轻量，开销小</li>
+<li>相较于HTTP更好的支持二进制内容</li>
+<li>支持扩展，可以定制自由的子协议</li>
+</ul>
+<h3 id="基于tcp实现的websocket">基于TCP实现的WebSocket</h3>
+<p>既然是基于TCP协议实现WebSocket那么一定要遵循TCP的三次握手与四次挥手的。与HTTP协议最大的不同是连接之后发送的内容不相同以及断开的时间不同而已，而WebSocket就是必须经历一次HTTP协议的一次握手，握手成功后就无需再依赖HTTP了，具体实现与标准可以参照https://tools.ietf.org/html/rfc6455#section-4，RFC6455中对该协议的解释。<br>
+简单的来讲就是建立一个WebSocket连接需要通过HTTP协议来向服务器发起一次建立请求，具体的请求头如下：</p>
+<blockquote>
+<p>GET /chat HTTP/1.1<br>
+Host: server.example.com<br>
+Upgrade: websocket<br>
+Connection: Upgrade<br>
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==<br>
+Origin: http://example.com<br>
+Sec-WebSocket-Protocol: chat, superchat<br>
+Sec-WebSocket-Version: 13</p>
+</blockquote>
+<p>可以看得出通过HTTP请求向服务器发送出升级该连接为WebSocket，并向服务器告知客户端支持哪些子协议Sec-WebSocket-Protocol，而Sec-WebSocket-Key字段则是服务器与客户端保证该连接真的是你的保证。并且通过HTTP /1.1 101相应该请求，如下：</p>
+<blockquote>
+<p>HTTP/1.1 101 Switching Protocols<br>
+Upgrade: websocket<br>
+Connection: Upgrade<br>
+Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=</p>
+</blockquote>
+<p>那么总结出来的几点就是：</p>
+<ul>
+<li>通过HTTP发送升级请求</li>
+<li>发送安全码给服务器返回并校验</li>
+<li>通知服务器客户端接受哪种子协议</li>
+<li>服务器返回101状态码表示建立WebSocket连接</li>
+<li>服务器返回安全码给客户端尽心安全校验</li>
+</ul>
+<p>可以看出来，WebSocket是跟HTTP协议一样的属于应用层协议，关于OSI七层协议详细分析会在后面尝试产出。WebSocket与TCP/IP中的Socket并不是一个东西，有兴趣的可以了解下Socket这个抽象层。既然是通过HTTP协议进行连接建立，那么跟HTTP一样也是有普通WebSocket跟安全WebSocket的，对应着HTTP的80与443端口，那么WebSocket协议的标识也就是有两个了：</p>
+<blockquote>
+<p>ws://123123.com/xxx<br>
+wss://12231.com/xxx</p>
+</blockquote>
+<p>那么关于建立之后的数据如何传输，这块儿还在学习中，不过可以根据RFC6455中的规范学习查阅，还是主要偏业务方为主</p>
+<h2 id="websocket-api">WebSocket API</h2>
+<p>既然是HTML5定义的一个API那么如何通过这些API完成一个WebSocket连接建立并向服务器发送一条消息呢？</p>
+<h3 id="websocket">WebSocket</h3>
+<p>要想建立一个WebSocket连接，那么需要通过js中的WebSocket方法并在构造函数中传入需要连接的地址：</p>
+<pre><code class="language-javaScript">const ws = WebSocket(&quot;wss://xxxx.com/xxx&quot;)
+</code></pre>
+<p>该方法会返回WebSocket的实列，以便我们在后续中使用，当调用成功后我们可以使用websocket.readyState来获取连接状态，它有以下几种枚举值:</p>
+<ul>
+<li>CONNECTING：值为0，表示正在连接</li>
+<li>OPEN：值为1，表示连接成功，可以通信了</li>
+<li>CLOSING：值为2，表示连接正在关闭</li>
+<li>CLOSED：值为3，表示连接已经关闭，或者打开连接失败<br>
+或者我们也可以为ws实例增加监听方法来监听WebSocket的连接状态</li>
+</ul>
+<h3 id="wsonopen">ws.onopen</h3>
+<p>该方法可以监听ws的连接建立成功,大多数业务逻辑便可以从该回调中开始。</p>
+<pre><code class="language-javaScript">    ws.onopen = function(e){
+        consoloe.log(&quot;连接已经建立&quot;);
+    }
+</code></pre>
+<h3 id="wsonclose">ws.onclose</h3>
+<p>该方法可以监听ws的连接断开</p>
+<pre><code class="language-javaScript">    ws.onclose = function(e){
+        consoloe.log(&quot;连接已经断开&quot;);
+    }
+</code></pre>
+<h3 id="wsonerror">ws.onerror</h3>
+<p>该方法监听ws发生错误，比如突然的连接中断</p>
+<pre><code class="language-javaScript">    ws.onerror = function(e){
+        consoloe.log(&quot;连接已经断开&quot;);
+    }
+</code></pre>
+<h3 id="wsonmessage">ws.onmessage</h3>
+<p>该方法可以监听服务器主动推送过来的信息,值得注意的是，客户端收到的数据可能是文本数据，也有可能是二进制数据，这里需要去注意判断下，当然也可以使用ws.binaryType来显示的指定希望收到的数据格式</p>
+<pre><code class="language-javaScript">    ws.onmessage = function(e){
+        consoloe.log(&quot;我收到消息啦&quot;);
+    }
+</code></pre>
+<h3 id="wssend">ws.send</h3>
+<p>该方法可以向服务器发送消息，同样的，之前说到WebSocket是支持二进制数据发送的，那么便可以发送文本或者是二进制的数据啦。</p>
+<pre><code class="language-javaScript">    ws.send(&quot;hello&quot;);
+</code></pre>
+<p>那么如何去判断我这条数据发送完成了吗，万一是一个超级大的二进制数据呢？那么可以使用ws.bufferedAmount来判断，它是记录还有多少没有发送出去的属性：</p>
+<pre><code class="language-javaScript">    let data = new ArrayBuffer(100000);
+    ws.send(data);
+    if(ws.bufferedAmount ===0) {
+        console.log(&quot;数据已经发送完成&quot;);
+    }
+</code></pre>
+<p>通过以上几个简单的API便可以完成一次WebSocket的连接与发送啦，下一篇会讲讲如何构建一个高可靠的WebSocket SDK来支持我们的平时业务开发</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://omobruce.github.io/cat-chai-fen/">
+              <h3 class="post-title">
+                下一篇：前端拆分
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <div class="slogan">我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。</div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/OMOBruce" target="_blank">
+          <i class="fab fa-github"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  糖小喵zzz | <a class="rss" href="https://omobruce.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

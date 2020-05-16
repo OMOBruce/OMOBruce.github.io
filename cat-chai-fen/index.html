@@ -1,0 +1,243 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>前端拆分 | 糖小喵zzz</title>
+<meta name="description" content="我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://omobruce.github.io/favicon.ico?v=1589618212799">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://omobruce.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://omobruce.github.io">
+        <img class="avatar" src="https://omobruce.github.io/images/avatar.png?v=1589618212799" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://omobruce.github.io">
+        <h1 class="site-title">糖小喵zzz</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://omobruce.github.io/xiao-bao-de-mao" class="menu purple-link">
+            小宝的猫
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">前端拆分</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2020-04-13</span>
+            
+          </div>
+          <div class="post-content">
+            <p>小打卡cat后台承担了越来越多的内部服务，目前这块儿内部系统仍然在被我们的外包团队在使用，出于安全的考虑以及业务分离的原则。计划将该系统拆分出来，形成cat内部专用系统，可能后续会针对访问端作出限制等安全操作。而针对外包团队的系统则希望独立出来。</p>
+<!-- more -->
+<h2 id="前端框架">前端框架</h2>
+<ul>
+<li>vue 小打卡技术栈前端框架，团队成员熟悉度相对较高</li>
+<li>react 新技术栈，需要团队成员熟练起来，但是生态好，社区活跃。</li>
+</ul>
+<h2 id="组件库">组件库</h2>
+<ul>
+<li>element 小打卡技术栈，推出时间较长稳定维护中</li>
+<li>ant design 新框架</li>
+</ul>
+<h2 id="额外">额外</h2>
+<p>以上方案是基于我们自己重头搭建项目环境，当然我们也可考虑现在市面上现有的集成方案，类似的像vue admin、react admin等。如果不选择这些集成方案 就需要我们自己一步步去完成</p>
+<ul>
+<li>项目框架搭建</li>
+<li>网络请求封装</li>
+<li>路由封装</li>
+<li>权限控制</li>
+<li>...</li>
+</ul>
+<h2 id="我们真的需要node-bff吗">我们真的需要node BFF吗？</h2>
+<p>一、从现有的业务场景来看，node能为我们做的东西似乎都太少，可能大家现在遇到最大的痛点可能是</p>
+<ul>
+<li>多个后端服务的交叉调用以及各个系统的鉴权方案不同导致的需要手动处理各个情况下的情况。</li>
+<li>CORS前端跨域问题，需要调用后端多个服务的时候</li>
+</ul>
+<blockquote>
+<p>BFF的意义之一，统一后端多系统间的鉴权调用，使业务更往前靠</p>
+</blockquote>
+<p>二、多个前端服务的直接调用后端服务，如果后端服务在中途针对某一个系统进行改动，那么所有涉及该系统的前端业务都需要跟着进行改动。改动起来就是极为复杂繁琐的工作</p>
+<blockquote>
+<p>提供一个类似于API-gateway的中间层接管前端的业务请求，哪怕只是透传也是一种统一方案！</p>
+</blockquote>
+<p>三、一个业务场景下需要请求几个接口然后拼接这些接口的数据来进行展示。就涉及到接口数据的拼装裁剪。</p>
+<blockquote>
+<p>提供一个中间层对接口数据进行聚合裁剪最后返回给不同前端业务场景</p>
+</blockquote>
+<h3 id="除了这些还可以做些什么">除了这些还可以做些什么？</h3>
+<p>前面提到的各点似乎总结起来就是对接口数据的调用并在合理情况对数据进行整合裁剪。但是仍然有限制，所有的数据依然是依赖于后端接口提供的字段信息。换种说法就是前端能够获取最大的数据量仍然受着后端接口返回数据量限制。</p>
+<blockquote>
+<p>graphql支持自由获取业务库中数据</p>
+</blockquote>
+<h2 id="node框架选型">Node框架选型</h2>
+<ul>
+<li>koa</li>
+<li>express</li>
+<li>nest</li>
+<li>midway</li>
+<li>egg</li>
+</ul>
+<p>现有业务场景，一个栗子，M站服务，定义一个接口请求，需要路由、中间件校验、处理业务逻辑、请求数据。涉及多个文件的修改才能完成，有意无意中在项目管理与代码复用上会有一定的难度。所以这里的框架都是从理念与实现上去解决了这些问题。横向对比几个框架无非是是否对async\await支持友好，是否是TS化，是否使用了IOC(控制反转)模式来构建框架。<br>
+从实际业务场景出发，大概整理了以下几点：</p>
+<ul>
+<li>中间件是否与具体接口非耦合</li>
+<li>路由是否复杂</li>
+<li>是否需要统一数据处理</li>
+<li>是否需要完备的数据采集与监控</li>
+<li>框架是否足够稳定</li>
+<li>是否有长期的支持</li>
+<li>是否需要各种开箱即用的插件的支持</li>
+</ul>
+<h2 id="关于监控">关于监控</h2>
+<p>假如我们引入了node来帮助我们完成一些事情，那么服务的稳定性就极其重要，调研了市面上的一些工具。</p>
+<h3 id="应用管理工具">应用管理工具</h3>
+<p>提供守护进程、平滑重启、负载均衡等功能、日志服务等</p>
+<ul>
+<li>pm2</li>
+<li>pandora</li>
+<li>...</li>
+</ul>
+<h3 id="健康监控">健康监控</h3>
+<p>除去应用本身的一个服务稳定，还需要关注运行环境的一个健康状态，主要指标可能是有磁盘占用、I/O,CPU负载、内存占用，等指标，应用管理工具只能提供的是应用的启动、停止、重启等基础能力，一旦涉及到更深入的问题排查就会比较乏力</p>
+<ul>
+<li>阿里云ecs监控</li>
+<li>linode监控</li>
+<li>slb监控</li>
+<li>sentry错误收集<br>
+可针对从客户端到服务端的全部阶段的监控，在问题排查起来的时候也会方便很多。</li>
+</ul>
+<h2 id="关于部署">关于部署</h2>
+<p>即使在引入了应用管理工具后单机部署的风险仍然很高，所以依然需要引入多台机器来保证服务的可用性。之前在M站的尝试使用了docker来管理应用，但是由于是手动发布，自动化程度不够高。且服务与服务间并没有真正的形成容器化。为了后续版本迭代的方便，因此还是推荐使用docker+自动化部署工具来进行上线部署。</p>
+<ul>
+<li>docker+jenkins</li>
+<li>docker+gitlab</li>
+<li>docker+手动</li>
+</ul>
+<h2 id="还有其他的">还有其他的...</h2>
+<p><img src="https://omobruce.github.io/post-images/1586836832587.png" alt="" loading="lazy"><br>
+<img src="https://omobruce.github.io/post-images/1586837607117.png" alt="" loading="lazy"></p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://omobruce.github.io/dns/">
+              <h3 class="post-title">
+                下一篇：DNS
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <div class="slogan">我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。</div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/OMOBruce" target="_blank">
+          <i class="fab fa-github"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  糖小喵zzz | <a class="rss" href="https://omobruce.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

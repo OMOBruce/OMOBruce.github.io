@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>flutter组件系列-Container | 糖小喵zzz</title>
+<meta name="description" content="我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://omobruce.github.io/favicon.ico?v=1589618212799">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://omobruce.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://omobruce.github.io">
+        <img class="avatar" src="https://omobruce.github.io/images/avatar.png?v=1589618212799" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://omobruce.github.io">
+        <h1 class="site-title">糖小喵zzz</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://omobruce.github.io/xiao-bao-de-mao" class="menu purple-link">
+            小宝的猫
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">flutter组件系列-Container</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2019-12-03</span>
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://omobruce.github.io/h8dWRs3k2/">
+                    flutter
+                    
+                  </a>
+                
+              </span>
+            
+          </div>
+          <div class="post-content">
+            <p>瞅瞅Container组件长啥样跟该怎么用。</p>
+<!-- more -->
+<h1 id="container">Container</h1>
+<p><img src="https://omobruce.github.io/post-images/1575339811689.png" alt="" loading="lazy"><br>
+官方对Container的定义是一个方便的小部件，结合了常见的绘制、定位和大小调整，简单的来讲它就是一个特殊div标签。</p>
+<pre><code>class Container extends StatelessWidget {
+  Container({
+    Key key,
+    this.alignment,
+    this.padding,
+    Color color,
+    Decoration decoration,
+    this.foregroundDecoration,
+    double width,
+    double height,
+    BoxConstraints constraints,
+    this.margin,
+    this.transform,
+    this.child,
+  }); 
+}
+</code></pre>
+<p>先来看看Container的代码。可以看出来Container是一个无状态组件并且能够接受一些参数。</p>
+<ul>
+<li>alignment 支持设置该容器下面的对齐方式</li>
+<li>padding 也就是我们平时所说的内边距同css</li>
+<li>color 支持设置容器的背景颜色但是不能与decoration共用。</li>
+<li>decoration 背景装饰</li>
+<li>foregroundDecoration 前景装饰</li>
+<li>width 支持设置该容器的宽度</li>
+<li>height 支持设置该容器的高度</li>
+<li>constraints 盒约束，有时候我们希望盒模型没有固定宽高的时候但是又希望他有最大最小的宽高限制的时候可以使用盒约束来进行设置</li>
+<li>margin 外边距同css</li>
+<li>transform 同css</li>
+<li>child 需要放在该容器下的子节点（子元素）</li>
+</ul>
+<h2 id="一个简单的">一个简单的🌰</h2>
+<pre><code>Container(
+	constraints: BoxConstraints.expand(
+     height: Theme.of(context).textTheme.display1.fontSize * 1.1 + 200.0,
+   ),
+   padding: const EdgeInsets.all(8.0),
+   color: Colors.blue[600],
+   alignment: Alignment.center,
+   child: Text('Hello World',
+     style: Theme.of(context)
+         .textTheme
+         .display1
+         .copyWith(color: Colors.white)),
+   transform: Matrix4.rotationZ(0.1),
+ )
+</code></pre>
+<p><img src="https://omobruce.github.io/post-images/1575341303935.png" alt="" loading="lazy"><br>
+从上图便可以很容易理解这些参数的意思了。其中constraints中的BoxConstraints是设置盒约束的专用方法。因为我们之前说过，dart是强类型语言，只接受它设定的参数类型，所以我们在使用对应组件的时候一定要给出对应的参数类型。</p>
+<h3 id="edgeinsets">EdgeInsets</h3>
+<p><img src="https://omobruce.github.io/post-images/1575341749536.png" alt="" loading="lazy"><br>
+EdgeInsets是用来填充边距的，适用于设置容器的margin、padding。具体得提供了下面几种方法：</p>
+<ul>
+<li>EdgeInsets.fromLTRB 分别接受左、上、右、下四个参数来设置每一边的填充数值（padding:10px 20px 30px 40px）</li>
+<li>EdgeInsets.all 上下左右的值都为一样的数值(padding:20px)</li>
+<li>EdgeInsets.only 支持设置某一边的填充数值（padding-left:20px）</li>
+</ul>
+<h3 id="boxdecoration">BoxDecoration</h3>
+<pre><code>BoxDecoration({
+  Color color, //颜色
+  DecorationImage image,//图片
+  BoxBorder border, //边框
+  BorderRadiusGeometry borderRadius, //圆角
+  List&lt;BoxShadow&gt; boxShadow, //阴影,可以指定多个
+  Gradient gradient, //渐变
+  BlendMode backgroundBlendMode, //背景混合模式
+  BoxShape shape = BoxShape.rectangle, //形状
+})
+</code></pre>
+<p>BoxDecoration是用来设置容器装饰样式的。</p>
+<h3 id="boxconstraints">BoxConstraints</h3>
+<pre><code>  const BoxConstraints({
+    this.minWidth = 0.0, //最小宽
+    this.maxWidth = double.infinity, //最大宽与父容器一样大
+    this.minHeight = 0.0, //最小高
+    this.maxHeight = double.infinity, //最大高与父容器一样大
+  });
+</code></pre>
+<p>BoxConstraints 是用来约束容器的最大最小值得。</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://omobruce.github.io/flutter-widget-yuan-li-jian-dan-fen-xi/">
+              <h3 class="post-title">
+                下一篇：flutter-widget原理简单分析
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <div class="slogan">我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。</div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/OMOBruce" target="_blank">
+          <i class="fab fa-github"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  糖小喵zzz | <a class="rss" href="https://omobruce.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>
