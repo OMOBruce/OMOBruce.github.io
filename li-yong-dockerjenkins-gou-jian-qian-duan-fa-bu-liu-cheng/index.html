@@ -1,0 +1,214 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>利用docker+jenkins构建前端发布流程 | 糖小喵zzz</title>
+<meta name="description" content="我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://omobruce.github.io/favicon.ico?v=1589708854883">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://omobruce.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://omobruce.github.io">
+        <img class="avatar" src="https://omobruce.github.io/images/avatar.png?v=1589708854883" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://omobruce.github.io">
+        <h1 class="site-title">糖小喵zzz</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://omobruce.github.io/xiao-bao-de-mao" class="menu purple-link">
+            小宝的猫
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">利用docker+jenkins构建前端发布流程</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2020-05-17</span>
+            
+          </div>
+          <div class="post-content">
+            <p>根据业务场景搭建了一套jenkins+docker的前端持续构建部署的流程，这里记录下一下关键的点。通过该流程大概熟悉下前端在自动化方向的一些探索<br>
+<img src="https://omobruce.github.io/post-images/1589705827279.jpg" alt="" loading="lazy"></p>
+<h1 id="jenkins">jenkins</h1>
+<p>作为最为流行的构建工具之一，被各个公司用来当做了自动化的工具。jenkins支持许多插件，几乎可以覆盖我们自动化中大部分的场景，当然也会有一些不支持。我们也可以通过替代方案来帮助我们解决。</p>
+<h2 id="编写一个构件任务">编写一个构件任务</h2>
+<p>首先我们需要通过jenkins来构建我们的docker镜像，但是这一步是非必要，如果我们有使用三方提供的容器仓库服务，一般都是会有提供自动触发构建的功能，完全可以避免我们自己手动构建。拿阿里云的ACR服务来说，他是一个容器镜像仓库，是提供自动构建以及构建完成的触发器功能。但是自动构建的代码源由于做了限制，并不支持我们现在使用的码云仓库，因此只能自己在本地构建完成后push到仓库进行分发。</p>
+<h3 id="acr容器镜像服务">ACR容器镜像服务</h3>
+<p>容器镜像服务（简称 ACR）提供云原生资产的安全托管和全生命周期管理，支持多场景下镜像的高效分发，与容器服务 ACK 无缝集成，打造云原生应用一站式解决方案。<br>
+简单来说，该服务提供了对于镜像的管理构建分发的解决方案。<br>
+<img src="https://omobruce.github.io/post-images/1589706150592.jpg" alt="" loading="lazy"><br>
+通过控制台我们可以看到该服务提供了自动构建镜像，以及设置构建构建规则，还有每一次的构建日志，为什么要使用该服务呢？这是为了我们后面再应用服务器上可以通过拉取镜像仓库里的不同镜像版本来快速启动应用所设计，不然到了应用服务器上还需要构建-&gt;启动，就变的耗时。</p>
+<h3 id="jenkins任务">jenkins任务</h3>
+<p>我们在jenkins中选择新建一个任务。然后选择构建一个自定义风格的任务。这里我们没有使用jenkins为我们提供的插件用来构建镜像，而是选择了shell一把梭，主要是会有一些特定的业务场景需要去处理。总的流程来讲就是通过拉取代码仓库的代码，通过在本地构建docker 镜像，然后push到远程的镜像仓库，这就是这个jenkins任务所需要做的事情。废话不多说直接贴代码。<br>
+<img src="https://omobruce.github.io/post-images/1589706684330.jpg" alt="" loading="lazy"><br>
+由于我们需要设置与仓库一样的镜像版本号，方便后续的对代码的管理。这里选择了代码仓库的tag作为镜像的版本号，当然作为一个临时的镜像中专站，每次构建完成后我们都需要将本次构建的镜像进行删除，来节省空间，因为存放在本地我们并不会使用它，就不让它占用空间了。这里我们选择的手动触发jenkins任务，当然我们也可在jenkins中利用hook功能在代码仓库打上标签或者master分支有push动作的时候自动触发。这里就详细说了。</p>
+<h3 id="dockerfile">Dockerfile</h3>
+<p>构建镜像最主要的是依赖Dockerfile来设置镜像每一步所需要做的事情。Dockerfile类似于配置文件，这里贴下我们的一部分构建设置<br>
+<img src="https://omobruce.github.io/post-images/1589707055120.jpg" alt="" loading="lazy"><br>
+Dockerfile的语法在docker官方网站有说明，这里说下几个简单的语法说明</p>
+<ul>
+<li>
+<p>FROM 表示需要拉取什么样的镜像环境作为基础镜像</p>
+</li>
+<li>
+<p>MAINTAINER 作者信息</p>
+</li>
+<li>
+<p>LABEL 标签信息</p>
+</li>
+<li>
+<p>ENV 设置镜像的环境变量，方便后面使用</p>
+</li>
+<li>
+<p>RUN 执行命令，在linux下主要是sh命令为主</p>
+</li>
+<li>
+<p>COPY 复制命令，主要是复制当前文件夹下的文件到镜像内部</p>
+</li>
+<li>
+<p>WORKDIR 工作文件夹，设置后会指定镜像命令在指定目录下</p>
+</li>
+<li>
+<p>EXPOSE 声明镜像对外暴露的访问端口号，这个不是绑定操作，端口绑定需要自己在启动容器的时候手动邦洞</p>
+</li>
+<li>
+<p>CMD 指定镜像容器在启动的时候需要执行命令</p>
+<p>需要注意的是，一般linux作为基础镜像我们都需要设置一下时区问题，不然会导致应用在使用时时区不正确。</p>
+</li>
+</ul>
+<h3 id="jenkins任务部署">jenkins任务部署</h3>
+<p>在完成了对我们应用镜像的构建并且成功推送至远端仓库后，我们便可以继续在目标机器上进行应用部署了。对于docker镜像的部署，这里有许多工具提供了强大的编排部署能力，最常见的k8s，一个针对针对集群服务提供的完成docker镜像容器编排管理工具，但是由于我们的项目比较简单，关于docker的编排部署在后续会聊到。这里讲讲最简单的。ecs应用服务器通过获取最新的docker镜像来更新应用。同样的在jenkins中新建一个任务，由于需要登录到目标应用服务器上进行操作。这里就需要将jenkins机器加入到目标服务器的访问白名单中，或者将目标服务器通过跳板机进行访问。非常不提议将目标服务器的访问端口直接暴露给公网访问。</p>
+<h3 id="部署">部署</h3>
+<p>在jenkins中访问远程服务器有很多办法，jenkins同样为我们提供了ssh链接远程服务器的插件，如果不想自己写shell脚本可以选择这种方式，当然我们可以通过自己编写shell脚本来实现登录<br>
+<img src="https://omobruce.github.io/post-images/1589708332874.png" alt="" loading="lazy"><br>
+这里提供了一个简单的登录脚本，使用的expect脚本。有兴趣的同学可以了解下~，在这里我们选择了使用jenkins的ssh插件。因为后续登录成功之后需要执行一些shell命令。我们把需要执行的shell命令保存为了sh文件，在登录成功后执行进行执行。<br>
+<img src="https://omobruce.github.io/post-images/1589708504135.png" alt="" loading="lazy"><br>
+在目标机器上执行shell脚本，主要流程就是拉取新的镜像，停止当前正在运行的容器服务，并删除旧容器与镜像，使用新的镜像启动容器。当然在启动成功之后一定要检测容器是否启动成功，在启动失败的时候一定要抛出异常。不然会导致应用无法访问。</p>
+<h4 id="后续">后续</h4>
+<p>在部署的时候会涉及到某一台应用服务器的短暂不可用，如果是线上大流量项目需要考虑在sbl(负载均衡)在对应应用服务器在进行构建的时候进行分流待对应的应用服务器成启动后再放开流量。</p>
+<p>通过以上几部简单的步骤，我们便可以简单的跑通一套自动化的构建部署流程，当然其中有些细节需要我们根据具体场景具体分析。以上，就是利用jenkins与docker来搭建前端的发布部署流程。<br>
+peace！</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://omobruce.github.io/lan-yu/">
+              <h3 class="post-title">
+                下一篇：蓝宇
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <div class="slogan">我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。</div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/OMOBruce" target="_blank">
+          <i class="fab fa-github"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  糖小喵zzz | <a class="rss" href="https://omobruce.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

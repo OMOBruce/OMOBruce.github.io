@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://omobruce.github.io</id>
     <title>糖小喵zzz</title>
-    <updated>2020-05-16T08:36:56.771Z</updated>
+    <updated>2020-05-17T09:47:38.634Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://omobruce.github.io"/>
     <link rel="self" href="https://omobruce.github.io/atom.xml"/>
@@ -13,6 +13,13 @@
     <logo>https://omobruce.github.io/images/avatar.png</logo>
     <icon>https://omobruce.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, 糖小喵zzz</rights>
+    <entry>
+        <title type="html"><![CDATA[利用docker+jenkins构建前端发布流程]]></title>
+        <id>https://omobruce.github.io/li-yong-dockerjenkins-gou-jian-qian-duan-fa-bu-liu-cheng/</id>
+        <link href="https://omobruce.github.io/li-yong-dockerjenkins-gou-jian-qian-duan-fa-bu-liu-cheng/">
+        </link>
+        <updated>2020-05-17T08:49:53.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[蓝宇]]></title>
         <id>https://omobruce.github.io/lan-yu/</id>
@@ -106,17 +113,6 @@
         <summary type="html"><![CDATA[<p>最近小打卡的圈主运营后台时不时爆出请求超时的异常，本着刻苦专研技术的精神。希望可以找出超时的问题，大多数情况下都没有问题的后台为啥会出现请求超时的问题。在请教了后端大佬们后得知管理后台的有部分静态资源请求超时了。刚听到这个消息的时候一脸懵逼。满脸黑人问号，静态资源为什么会请求超时？</p>
 ]]></summary>
         <content type="html"><![CDATA[<p>最近小打卡的圈主运营后台时不时爆出请求超时的异常，本着刻苦专研技术的精神。希望可以找出超时的问题，大多数情况下都没有问题的后台为啥会出现请求超时的问题。在请教了后端大佬们后得知管理后台的有部分静态资源请求超时了。刚听到这个消息的时候一脸懵逼。满脸黑人问号，静态资源为什么会请求超时？</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[小打卡-前端在SEO中的实践]]></title>
-        <id>https://omobruce.github.io/xiao-da-qia-qian-duan-zai-seo-zhong-de-shi-jian/</id>
-        <link href="https://omobruce.github.io/xiao-da-qia-qian-duan-zai-seo-zhong-de-shi-jian/">
-        </link>
-        <updated>2019-12-23T03:12:12.000Z</updated>
-        <summary type="html"><![CDATA[<p>SEO（Search Engine Optimization）：汉译为搜索引擎优化。是一种方式：利用搜索引擎的规则提高网站在有关搜索引擎内的自然排名。目的是让其在行业内占据领先地位，获得品牌收益。很大程度上是网站经营者的一种商业行为，将自己或自己公司的排名前移。</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>SEO（Search Engine Optimization）：汉译为搜索引擎优化。是一种方式：利用搜索引擎的规则提高网站在有关搜索引擎内的自然排名。目的是让其在行业内占据领先地位，获得品牌收益。很大程度上是网站经营者的一种商业行为，将自己或自己公司的排名前移。</p>
 ]]></content>
     </entry>
 </feed>
