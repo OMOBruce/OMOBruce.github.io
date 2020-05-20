@@ -1,0 +1,357 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>聊聊flutter的多媒体压缩 | 糖小喵zzz</title>
+<meta name="description" content="我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://omobruce.github.io/favicon.ico?v=1589991567134">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://omobruce.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://omobruce.github.io">
+        <img class="avatar" src="https://omobruce.github.io/images/avatar.png?v=1589991567134" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://omobruce.github.io">
+        <h1 class="site-title">糖小喵zzz</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://omobruce.github.io/xiao-bao-de-mao" class="menu purple-link">
+            小宝的猫
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">聊聊flutter的多媒体压缩</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2020-05-19</span>
+            
+          </div>
+          <div class="post-content">
+            <p>我们都知道flutter作为一个UI框架在本质能力上是不具备任何的对资源文件处理的能力，那么在hybrid的app开发中难免不会遇到对多媒体资源的处理，一种很常见的场景就是上传场景。现在的手机拍摄的图片或者视频动不动就是几十上百MB的大小。那么针对移动端复杂的网络环境，上传这么大的文件显然是行不通的。这里主要是记录下在flutter开发中在遇到视频、图片的上传压缩处理问题。</p>
+<!-- more -->
+<h2 id="flutter-plug">flutter plug</h2>
+<p>flutter既然是UI框架，想必google也是跟其他混合开发框架一样为我们提供了一种方式来获取原生的能力，不然就单纯的依赖UI框架可以做的事情就是极为少的。在flutter中它为我们提供了MethodChannel作为flutter调用原生的能力的通道。这个通道内传输的数据经过编码的二进制数据。具体的关于flutter插件的运行机制与方式在博客的另一篇文章有写。这里因为只做了ios的相关开发，所以就聊一聊在ios下关于多媒体的处理的坑与经验</p>
+<h2 id="视频">视频</h2>
+<p>引用阮一峰老师的文章，视频文件本身其实是一个容器。里面会分为两个文件，一个是音频文件和视频文件，也就是说我们看到的视频文件其实是没有声音的，声音是另一个文件。常见的视频格式通常有以下几种：</p>
+<ul>
+<li>MP4</li>
+<li>MKV</li>
+<li>WebM</li>
+<li>AVI</li>
+</ul>
+<h3 id="编码格式">编码格式</h3>
+<p>视频与音频都要经过编码才能保存成我们上面所说的文件格式。而不同的编码格式通常对应这不同的压缩率</p>
+<ul>
+<li>H.262</li>
+<li>H264</li>
+<li>H.265</li>
+</ul>
+<p>而我们通常对视频进行压缩处理就是针对不同编码格式的不同压缩率进行调整。</p>
+<h3 id="音频编码格式">音频编码格式</h3>
+<ul>
+<li>MP3</li>
+<li>AAC</li>
+</ul>
+<h3 id="视频参数">视频参数</h3>
+<p>上面提到的编码格式都是有损编码。<br>
+通过以上的参数，我们可以得出针对视频的压缩处理，那么我们可以从分辨率、帧率、比特率、采样率、码率几个方面下手来压缩我们的视频大小。</p>
+<ul>
+<li>分辨率 也就是视频的每一帧(图片)的尺寸、例如1920<em>1080分辨率的视频，那么就意味着在这一帧上会有1920</em>1080个像素。</li>
+<li>帧率 也就是每秒下会有多少帧(图片)播放，也就是说帧率越低画面看起来越卡顿，帧率越高画面越流畅</li>
+<li>比特率 即每秒能够传输的文件大小，比特率越高，每秒能够传输的数据越大</li>
+<li>采样率 即单位时间内的采样次数，采样率越高，那么视频就越接近没有处理过的视频文件</li>
+<li>码率 即单位时间内传输的数据位数，码率是与视频体积成正比的，码率越大，体积越大。</li>
+</ul>
+<h2 id="ffmpeg">FFmpeg</h2>
+<p>Fmpeg是领先的多媒体框架，能够解码，编码，转码，mux，demux，流，过滤和播放人类和机器创造的几乎所有东西。作为现目前被广泛使用的音视频编解码工具已经被使用在很多平台上。当然在ios端同样有实现。但是考虑到FFmpeg的文件库大小并且IOS本身也为我们提供了AVFoundation这个库来帮助我们针对视频进行处理，因此这里就不针对FFmpeg展开讲了。但是FFmpeg是个很强大的工具。</p>
+<h2 id="avfoundation">AVFoundation</h2>
+<p>AVFoundation是可以用它来播放和创建基于时间的视听媒体的几个框架之一，它提供了基于时间的视听数据的详细界别上的OC接口。可以用它来检查、创建、编辑、重新编码媒体文件。也可以从设备得到输入流和实时捕捉回放过程中操控视频<br>
+<img src="https://omobruce.github.io/post-images/1589902378749.jpg" alt="" loading="lazy"><br>
+通过上图简单的结构图可以得知AVFoundation是通过IOS几个核心库来对外提供接口的</p>
+<ul>
+<li>Core Audio是音频和MIDI内容的录制、播放和处理提供接口。</li>
+<li>Core Video是为Core Media提供图片换成和缓存池支持，并提供了针对视频的逐帧访问接口</li>
+<li>Core Media是对音频处理的接口，并且可以基于CMTime对视频基于时间处理</li>
+</ul>
+<h2 id="flutter的视频压缩">flutter的视频压缩</h2>
+<p>既然AVFoundation是原生方法，那么我在flutter中使用就需要通过插件的形式来调用原生的能力。首先我们需要声明一个flutter_video_custom_compress.dart来作为flutter层调用原生能力的入口，这个文件主要是声明我们需要调用的原生方法的名称，定义对flutter暴露的接口以及一些数据处理逻辑、</p>
+<pre><code class="language-dart">import 'dart:async';
+
+import 'package:flutter/services.dart';
+
+class FlutterVideoCustomCompress {
+  static const MethodChannel _channel =
+      const MethodChannel('flutter/flutter_video_custom_compress');
+
+  static Future compress(String path) async {
+    final Map&lt;String,dynamic&gt; params = &lt;String,dynamic&gt;{
+      &quot;path&quot;:path
+    };
+    var res = await _channel.invokeMethod('compressVideo',params);
+    return res;
+  }
+}
+</code></pre>
+<p>这里在MethodChannel里传入我们需要调用的原生方法名，然后在invokeMethod方法中指定我们需要使用的方法。接着是原生层。</p>
+<p>首先是声明头文件件，定义一个接口文件</p>
+<pre><code class="language-object-c">#import &lt;Flutter/Flutter.h&gt;
+
+@interface FlutterVideoCustomCompressPlugin : NSObject&lt;FlutterPlugin&gt;{
+    FlutterResult resultBack;
+}
+@end
+</code></pre>
+<p>接着是逻辑方法</p>
+<pre><code class="language-object-c">#import &quot;FlutterVideoCustomCompressPlugin.h&quot;
+#import &lt;AVFoundation/AVFoundation.h&gt;
+@interface FlutterVideoCustomCompressPlugin ()
+@property(nonatomic, retain) FlutterMethodChannel *channel;
+@end
+
+@implementation FlutterVideoCustomCompressPlugin
+static NSString *const CHANNEL_NAME = @&quot;flutter/flutter_video_custom_compress&quot;;
+
++ (void)registerWithRegistrar:(NSObject&lt;FlutterPluginRegistrar&gt;*)registrar {
+    FlutterMethodChannel *channel = [FlutterMethodChannel methodChannelWithName:CHANNEL_NAME
+                                                                  binaryMessenger:[registrar messenger]];
+    FlutterVideoCustomCompressPlugin *instance = [[FlutterVideoCustomCompressPlugin alloc] init];
+    instance.channel = channel;
+    [registrar addMethodCallDelegate:instance channel:channel];
+}
+</code></pre>
+<p>这里声明与调用层一样的插件名称，并且将其注册到methodChannel中，接着通过handleMethodCall来对外提供我们自定义的各个方法。</p>
+<h3 id="获取调用参数">获取调用参数</h3>
+<p>通过call.arguments来获取调用层传过来的参数。并将所需要的参数进行格式化。这里因为只传了path参数，那么就需要将其通过fileURLWithPath转换为NSURL。</p>
+<pre><code class="language-object-c">         NSDictionary *dicc = call.arguments;
+         NSString *path = [NSString stringWithFormat:@&quot;%@&quot;,[dicc objectForKey:@&quot;path&quot;]];
+         NSURL *videoUrl = [NSURL fileURLWithPath: path];
+</code></pre>
+<h3 id="定义压缩参数与处理path文件">定义压缩参数与处理path文件</h3>
+<p>我们需要将NSURL文件读取出来转换成asset文件。并且需要定义我们后面压缩需要使用的参数，当然压缩参数我们也可以通过外部传入，这样增加更高自由度的压缩。</p>
+<pre><code class="language-object-c">         NSInteger compressBiteRate = 1500 * 1024;
+             NSInteger compressFrameRate = 30;
+             NSInteger compressWidth = 960;
+             NSInteger compressHeight = 540;
+             //取出原视频详细资料
+             AVURLAsset *asset = [AVURLAsset assetWithURL:videoUrl];
+             //压缩前原视频大小MB
+             unsigned long long fileSize = [[NSFileManager defaultManager] attributesOfItemAtPath:videoUrl.path error:nil].fileSize;
+             float fileSizeMB = fileSize / (1024.0*1024.0);
+             //取出asset中的视频文件
+             AVAssetTrack *videoTrack = [asset tracksWithMediaType:AVMediaTypeVideo].firstObject;
+             //压缩前原视频真实宽高
+             NSInteger videoWidth = videoTrack.naturalSize.width;
+             NSInteger videoHeight = videoTrack.naturalSize.height;
+</code></pre>
+<p>这里主要是使用AVURLAsset方法对文件进行处理，并且获取原视频的宽高信息。压缩前，我们需要针对原视频与压缩的宽高进行一次对比，不然有些横着拍的视频。会导致最后的视频文件比例出错。</p>
+<pre><code class="language-object-c">             //设置动态分辨率
+             //竖屏状态
+             if(videoWidth &lt; videoHeight) {
+                if(videoWidth &gt;= 1080){
+                    compressWidth = 720;
+                    compressHeight = 1280;
+                }
+                else if(videoWidth &gt;= 720 &amp;&amp; videoWidth &lt; 1080){
+                    compressWidth = 540;
+                    compressHeight = 960;
+                }
+                else {
+                    compressWidth = videoWidth;
+                    compressHeight = videoHeight;
+                }
+             }else{
+                if(compressHeight &gt;= 1080){
+                    compressWidth = 1280;
+                    compressHeight = 720;
+                }
+                else if(compressHeight &gt;= 720 &amp;&amp; compressHeight &lt; 1080){
+                    compressWidth = 960;
+                    compressHeight = 540;
+                }
+                else {
+                    compressWidth = videoWidth;
+                    compressHeight = videoHeight;
+                }
+             }
+
+</code></pre>
+<p>通过固定写死部分分辨率参数，来模拟最佳压缩参数，这部分也可以通过我们传入更自定义的参数来设置。同样的需要对原视频的码率与帧率来处理，我们知道码率与视频的文件大小是成线性增长的。那么如果预设的码率大于原视频的码率这里就不需要处理，帧率同样。<br>
+视频压缩也就是针对视频文件的每一帧进行处理，因此我们需要将音频、视频分开处理。这里需要创建几个流来对其处理。一个视频读取流、一个音频读取流、一个视频写入流、一个音频写入流。</p>
+<pre><code class="language-object-c">                         AVAssetReaderTrackOutput *videoOutput = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:videoTrack outputSettings:[FlutterVideoCustomCompressPlugin configVideoOutput]];
+             AVAssetReaderTrackOutput *audioOutput = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:audioTrack outputSettings:[FlutterVideoCustomCompressPlugin configAudioOutput]];
+             AVAssetWriterInput *videoInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:[FlutterVideoCustomCompressPlugin videoCompressSettingsWithBitRate:compressBiteRate withFrameRate:compressFrameRate withWidth:compressWidth WithHeight:compressHeight withOriginalWidth:videoWidth withOriginalHeight:videoHeight]];
+             AVAssetWriterInput *audioInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:[FlutterVideoCustomCompressPlugin audioCompressSettings]];
+</code></pre>
+<p>接着就可以通过一边读文件一边写文件的方式来对视频文件处理。需要主要的是我们需要创建两个队列来针对帧文件处理，因为读写流的数据并不是对等，就需要一个缓冲区来处理这种情况，并且需要创建新的线程来并行处理音视频文件，以此获得最快的处理速度。</p>
+<pre><code class="language-object-c">             //创建视频写入队列
+             dispatch_queue_t videoQueue = dispatch_queue_create(&quot;Video Queue&quot;, DISPATCH_QUEUE_SERIAL);
+             //创建音频写入队列
+             dispatch_queue_t audioQueue = dispatch_queue_create(&quot;Audio Queue&quot;, DISPATCH_QUEUE_SERIAL);
+             //创建一个线程组
+             dispatch_group_t group = dispatch_group_create();
+             //进入线程组
+             dispatch_group_enter(group);
+</code></pre>
+<p>在写入视频文件的时候因为对视频的分辨率做了处理，那么我们需要将原视频的视频方向同样写入压缩后的视频，不然压缩后的视频就会出现方向不正确的情况。</p>
+<pre><code class="language-object-c">             //完成压缩
+             dispatch_group_notify(group, dispatch_get_main_queue(), ^{
+                 if ([reader status] == AVAssetReaderStatusReading) {
+                     [reader cancelReading];
+                 }
+                 switch (writer.status) {
+                     case AVAssetWriterStatusWriting:
+                     {
+                         [writer finishWritingWithCompletionHandler:^{
+                             [dic setObject:outputUrlStr forKey:@&quot;urlStr&quot;];
+                             result(dic);
+                         }];
+                     }
+                         break;
+                     case AVAssetWriterStatusCancelled:
+                         NSLog(@&quot;取消压缩&quot;);
+                         break;
+                     case AVAssetWriterStatusFailed:
+                         NSLog(@&quot;===error：%@===&quot;, writer.error);
+                         result(@&quot;压缩失败&quot;);
+                         break;
+                     case AVAssetWriterStatusCompleted:
+                     {
+                         NSLog(@&quot;压缩完成&quot;);
+                         [writer finishWritingWithCompletionHandler:^{
+                             [dic setObject:outputUrlStr forKey:@&quot;urlStr&quot;];
+                             result(dic);
+                         }];
+                     }
+                         break;
+                     default:
+                         break;
+                 }
+             });
+</code></pre>
+<p>在线程回调函数里，我们设置回调的监听，当压缩完成的时候将写入完成后的文件传入调用压缩的回调函数，然后交由flutter返回给调用层。当然压缩参数的设置在AVFoundation中的文档有详细说明。特别是针对的视频帧处理的相关参数。有兴趣的可以了解下。<br>
+通过以上简单的利用AVFoundation对视频的功能支持，我们就可以完成简单的视频压缩功能，上面讲到的会获取到视频帧文件，那么在对视频水印，视频动画都可以处理了。AVFoundation作为极为强大的工具，不仅仅在视频压缩这块儿，有兴趣的可以了解下，一同学习。<br>
+peace！</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://omobruce.github.io/li-yong-dockerjenkins-gou-jian-qian-duan-fa-bu-liu-cheng/">
+              <h3 class="post-title">
+                下一篇：利用docker+jenkins构建前端发布流程
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <div class="slogan">我们总要一次次粉碎自己，
+投身新天地，
+重新建立自己的喜欢，
+重新建立自己的幸福。</div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/OMOBruce" target="_blank">
+          <i class="fab fa-github"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  糖小喵zzz | <a class="rss" href="https://omobruce.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

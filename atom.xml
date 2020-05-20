@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://omobruce.github.io</id>
     <title>糖小喵zzz</title>
-    <updated>2020-05-17T09:47:38.634Z</updated>
+    <updated>2020-05-20T16:19:33.022Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://omobruce.github.io"/>
     <link rel="self" href="https://omobruce.github.io/atom.xml"/>
@@ -13,6 +13,17 @@
     <logo>https://omobruce.github.io/images/avatar.png</logo>
     <icon>https://omobruce.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, 糖小喵zzz</rights>
+    <entry>
+        <title type="html"><![CDATA[聊聊flutter的多媒体压缩]]></title>
+        <id>https://omobruce.github.io/liao-liao-flutter-de-duo-mei-ti-ya-suo/</id>
+        <link href="https://omobruce.github.io/liao-liao-flutter-de-duo-mei-ti-ya-suo/">
+        </link>
+        <updated>2020-05-19T14:25:03.000Z</updated>
+        <summary type="html"><![CDATA[<p>我们都知道flutter作为一个UI框架在本质能力上是不具备任何的对资源文件处理的能力，那么在hybrid的app开发中难免不会遇到对多媒体资源的处理，一种很常见的场景就是上传场景。现在的手机拍摄的图片或者视频动不动就是几十上百MB的大小。那么针对移动端复杂的网络环境，上传这么大的文件显然是行不通的。这里主要是记录下在flutter开发中在遇到视频、图片的上传压缩处理问题。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>我们都知道flutter作为一个UI框架在本质能力上是不具备任何的对资源文件处理的能力，那么在hybrid的app开发中难免不会遇到对多媒体资源的处理，一种很常见的场景就是上传场景。现在的手机拍摄的图片或者视频动不动就是几十上百MB的大小。那么针对移动端复杂的网络环境，上传这么大的文件显然是行不通的。这里主要是记录下在flutter开发中在遇到视频、图片的上传压缩处理问题。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[利用docker+jenkins构建前端发布流程]]></title>
         <id>https://omobruce.github.io/li-yong-dockerjenkins-gou-jian-qian-duan-fa-bu-liu-cheng/</id>
@@ -102,17 +113,6 @@
         <summary type="html"><![CDATA[<p>对于flutter来说它毕竟是一个ui框架仍然有很多事情它是做不了的，比如一些系统底层的接口就需要原生实现，并且虽然现在flutter很火但是生态仍然需要完善，像是ios、android上有大量好用的原生库可以使用，在flutter就没有因此就需要用插件的方式来实现对原生功能的一些调用。</p>
 ]]></summary>
         <content type="html"><![CDATA[<p>对于flutter来说它毕竟是一个ui框架仍然有很多事情它是做不了的，比如一些系统底层的接口就需要原生实现，并且虽然现在flutter很火但是生态仍然需要完善，像是ios、android上有大量好用的原生库可以使用，在flutter就没有因此就需要用插件的方式来实现对原生功能的一些调用。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[记一次前端项目迁移]]></title>
-        <id>https://omobruce.github.io/ji-yi-ci-qian-duan-xiang-mu-qian-yi/</id>
-        <link href="https://omobruce.github.io/ji-yi-ci-qian-duan-xiang-mu-qian-yi/">
-        </link>
-        <updated>2019-12-23T06:41:44.000Z</updated>
-        <summary type="html"><![CDATA[<p>最近小打卡的圈主运营后台时不时爆出请求超时的异常，本着刻苦专研技术的精神。希望可以找出超时的问题，大多数情况下都没有问题的后台为啥会出现请求超时的问题。在请教了后端大佬们后得知管理后台的有部分静态资源请求超时了。刚听到这个消息的时候一脸懵逼。满脸黑人问号，静态资源为什么会请求超时？</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>最近小打卡的圈主运营后台时不时爆出请求超时的异常，本着刻苦专研技术的精神。希望可以找出超时的问题，大多数情况下都没有问题的后台为啥会出现请求超时的问题。在请教了后端大佬们后得知管理后台的有部分静态资源请求超时了。刚听到这个消息的时候一脸懵逼。满脸黑人问号，静态资源为什么会请求超时？</p>
 ]]></content>
     </entry>
 </feed>
